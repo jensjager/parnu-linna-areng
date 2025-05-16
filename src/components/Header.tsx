@@ -32,6 +32,14 @@ export default function Header() {
             </li>
             <li>
               <Link
+                href="/arengukava"
+                className="hover:text-blue-200 transition-colors"
+              >
+                Arengukava
+              </Link>
+            </li>
+            <li>
+              <Link
                 href="/ideed"
                 className="hover:text-blue-200 transition-colors"
               >
@@ -44,14 +52,6 @@ export default function Header() {
                 className="hover:text-blue-200 transition-colors"
               >
                 Küsitlused
-              </Link>
-            </li>
-            <li>
-              <Link
-                href="/kontakt"
-                className="hover:text-blue-200 transition-colors"
-              >
-                Kontakt
               </Link>
             </li>
           </ul>
