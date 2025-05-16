@@ -30,7 +30,7 @@ const sektorid: Sektor[] = [
   { id: 4, nimi: "Sport" },
   { id: 5, nimi: "Ettevõtlus" },
   { id: 6, nimi: "Elukeskkond" },
-  { id: 7, nimi: "Avalik teenused" },
+  { id: 7, nimi: "Avalikud teenused" },
   { id: 8, nimi: "Haridus" },
   { id: 9, nimi: "Muu"}
 ];
@@ -94,6 +94,14 @@ const mockIdeas: Idea[] = Array.from({ length: 45 }, (_, i) => ({
   hääletusel: Math.random() > 0.5,
   sektorId: Math.floor(Math.random() * 6) + 1
 }));
+ /**
+ * Admin authentication is handled using environment variables
+ * Required env variables:
+ * - NEXT_PUBLIC_ADMIN_PASSWORD: The password for admin access
+ * 
+ * These should be stored in .env.local file which is not committed to the repository
+ * For production, set these values in your hosting platform's environment variables
+ */
 
 export default function Arengukava() {
   const [authenticated, setAuthenticated] = useState(false);
@@ -105,8 +113,9 @@ export default function Arengukava() {
   const [currentPage, setCurrentPage] = useState(1);
   const [selectedIdea, setSelectedIdea] = useState<Idea | null>(null);
   const [editedIdea, setEditedIdea] = useState<Idea | null>(null);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [selectedSector, setSelectedSector] = useState<number | null>(null);
   const ideasPerPage = 20;
-
   /**
    * API Integration Required:
    * 1. On component mount, fetch sectors with GET /api/sektorid
@@ -128,10 +137,24 @@ export default function Arengukava() {
    * }, [currentPage]);
    */
 
+  // Filter ideas based on search term and selected sector
+  const filteredIdeas = ideas.filter((idea) => {
+    // Apply search filter
+    const matchesSearch = searchTerm === '' || 
+      idea.pealkiri.toLowerCase().includes(searchTerm.toLowerCase()) || 
+      idea.kirjeldus.toLowerCase().includes(searchTerm.toLowerCase());
+    
+    // Apply sector filter
+    const matchesSector = selectedSector === null || idea.sektorId === selectedSector;
+    
+    // Return true if the idea matches both filters
+    return matchesSearch && matchesSector;
+  });
+
   // Get current ideas based on pagination
   const indexOfLastIdea = currentPage * ideasPerPage;
   const indexOfFirstIdea = indexOfLastIdea - ideasPerPage;
-  const currentIdeas = ideas.slice(indexOfFirstIdea, indexOfLastIdea);
+  const currentIdeas = filteredIdeas.slice(indexOfFirstIdea, indexOfLastIdea);
   // Handle opening the idea editor popup
   const handleIdeaClick = (idea: Idea) => {
     setSelectedIdea(idea);
@@ -148,17 +171,13 @@ export default function Arengukava() {
      */
   };
 
-  // Handle closing the idea editor popup
   const handleClosePopup = () => {
     setSelectedIdea(null);
     setEditedIdea(null);
   };
-  // Handle saving edited idea
   const handleSaveIdea = () => {
     if (!editedIdea) return;
-    
-    // Update the idea in the ideas array
-    setIdeas(ideas.map(idea => 
+      setIdeas(ideas.map(idea => 
       idea.id === editedIdea.id ? editedIdea : idea
     ));
     
@@ -191,10 +210,11 @@ export default function Arengukava() {
      */
     
     handleClosePopup();
-  };
-    const handleSubmit = (e: React.FormEvent) => {
+  };    const handleSubmit = (e: React.FormEvent) => {    
     e.preventDefault();
-    if (password === 'naidisParoolParnu2035') {
+    const adminPassword = process.env.NEXT_PUBLIC_ADMIN_PASSWORD;
+    
+    if (password === adminPassword) {
       setAuthenticated(true);
       setError('');
       
@@ -267,49 +287,108 @@ export default function Arengukava() {
         </div>
       </div>
     );
-  }
-  return (
+  }  return (
     <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">      <main className="flex flex-col gap-[32px] row-start-2 items-center w-full max-w-6xl">
-        <h1 className="text-4xl font-bold text-white">Arengukava Admin</h1>
+        <h1 className="text-4xl font-bold text-white">Ideedehaldur</h1>
+        
+        {/* Search and Filter Controls */}
+        <div className="w-full flex flex-col sm:flex-row gap-4">
+          {/* Search Bar */}
+          <div className="flex-1">
+            <div className="relative">
+              <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                <svg className="w-4 h-4 text-gray-500" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 20">
+                  <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="m19 19-4-4m0-7A7 7 0 1 1 1 8a7 7 0 0 1 14 0Z"/>
+                </svg>
+              </div>
+              <input 
+                type="search" 
+                className="block w-full p-3 pl-10 text-sm text-black border border-gray-300 rounded-lg bg-white"
+                placeholder="Otsi ideid..." 
+                value={searchTerm}
+                onChange={(e) => {
+                  setSearchTerm(e.target.value);
+                  setCurrentPage(1); // Reset to first page when searching
+                }}
+              />
+            </div>
+          </div>
+          
+          {/* Sector Filter */}
+          <div className="w-full sm:w-64">
+            <select
+              className="block w-full p-3 text-sm text-black border border-gray-300 rounded-lg bg-white"
+              value={selectedSector === null ? '' : selectedSector}
+              onChange={(e) => {
+                const value = e.target.value === '' ? null : Number(e.target.value);
+                setSelectedSector(value);
+                setCurrentPage(1); // Reset to first page when filtering
+              }}
+            >
+              <option value="">Kõik sektorid</option>
+              {sektorid.map(sektor => (
+                <option key={sektor.id} value={sektor.id}>
+                  {sektor.nimi}
+                </option>
+              ))}
+            </select>
+          </div>
+        </div>
         
         {/* Ideas Grid */}
         <div className="w-full">
-          <h2 className="text-2xl font-bold mb-4 text-white">Ideed</h2>
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 mb-6">            {currentIdeas.map((idea) => (
-              <div 
-                key={idea.id}
-                onClick={() => handleIdeaClick(idea)}
-                className="bg-white p-4 rounded-md shadow cursor-pointer hover:shadow-md transition-shadow border border-gray-200"
-              >
-                <h3 className="font-medium text-black line-clamp-2 h-12">{idea.pealkiri}</h3>
-                <div className="flex flex-col gap-1 mt-2">
-                  <div className="flex items-center">
-                    <div className={`h-3 w-3 rounded-full mr-2 ${idea.hääletusel ? 'bg-green-500' : 'bg-gray-300'}`}></div>
-                    <span className="text-sm text-gray-600">{idea.hääletusel ? 'Hääletusel' : 'Ei ole hääletusel'}</span>
-                  </div>
-                  <div className="text-sm text-gray-600 mt-1">
-                    <span className="font-medium">Sektor:</span> {sektorid.find(s => s.id === idea.sektorId)?.nimi}
+          <h2 className="text-2xl font-bold mb-4 text-white">Ideed</h2>          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 mb-6">
+            {currentIdeas.length > 0 ? (
+              currentIdeas.map((idea) => (
+                <div 
+                  key={idea.id}
+                  onClick={() => handleIdeaClick(idea)}
+                  className="bg-white p-4 rounded-md shadow cursor-pointer hover:shadow-md transition-shadow border border-gray-200"
+                >
+                  <h3 className="font-medium text-black line-clamp-2 h-12">{idea.pealkiri}</h3>
+                  <div className="flex flex-col gap-1 mt-2">
+                    <div className="flex items-center">
+                      <div className={`h-3 w-3 rounded-full mr-2 ${idea.hääletusel ? 'bg-green-500' : 'bg-gray-300'}`}></div>
+                      <span className="text-sm text-gray-600">{idea.hääletusel ? 'Hääletusel' : 'Ei ole hääletusel'}</span>
+                    </div>
+                    <div className="text-sm text-gray-600 mt-1">
+                      <span className="font-medium">Sektor:</span> {sektorid.find(s => s.id === idea.sektorId)?.nimi}
+                    </div>
                   </div>
                 </div>
+              ))
+            ) : (
+              <div className="col-span-full text-center py-8">
+                <p className="text-white text-lg">Ei leitud ühtegi sobivat ideed</p>
+                <button 
+                  onClick={() => {
+                    setSearchTerm('');
+                    setSelectedSector(null);
+                  }}
+                  className="mt-4 px-4 py-2 bg-blue-600 text-black rounded-md hover:bg-blue-700"
+                >
+                  Lähtesta otsingufiltrid
+                </button>
               </div>
-            ))}
-          </div>
-              {/* Pagination */}
+            )}
+          </div>{/* Pagination */}
           <div className="flex justify-center mt-6">
-            <button 
-              onClick={() => setCurrentPage(1)}
-              disabled={currentPage === 1}
-              className="px-4 py-2 mx-1 bg-white text-black border border-gray-300 rounded-md disabled:opacity-50"
-            >
-              1
-            </button>
-            <button 
-              onClick={() => setCurrentPage(2)}
-              disabled={currentPage === 2}
-              className="px-4 py-2 mx-1 bg-white text-black border border-gray-300 rounded-md disabled:opacity-50"
-            >
-              2
-            </button>
+            {filteredIdeas.length > 0 ? (
+              <>
+                {Array.from({ length: Math.ceil(filteredIdeas.length / ideasPerPage) }, (_, i) => (
+                  <button 
+                    key={i + 1}
+                    onClick={() => setCurrentPage(i + 1)}
+                    disabled={currentPage === i + 1}
+                    className="px-4 py-2 mx-1 bg-white text-black border border-gray-300 rounded-md disabled:opacity-50"
+                  >
+                    {i + 1}
+                  </button>
+                ))}
+              </>
+            ) : (
+              <p className="text-white">Ei leitud ühtegi sobivat ideed</p>
+            )}
             {/**
              * Pagination API Integration:
              * The API should return total count and total pages
