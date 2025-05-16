@@ -6,7 +6,9 @@ type Idee = {
   email: string;
   pealkiri: string;
   kirjeldus: string;
+  valdkond: string; // new field
 };
+
 
 export default function IdeedPage() {
   const [form, setForm] = useState<Idee>({
@@ -14,6 +16,7 @@ export default function IdeedPage() {
     email: "",
     pealkiri: "",
     kirjeldus: "",
+    valdkond: "",
   });
   const [saadetud, setSaadetud] = useState(false);
 
@@ -32,6 +35,7 @@ export default function IdeedPage() {
       email: "",
       pealkiri: "",
       kirjeldus: "",
+      valdkond: "", // reset on submit
     });
   };
 
@@ -90,6 +94,32 @@ export default function IdeedPage() {
             className="w-full border rounded px-3 py-2"
           />
         </div>
+
+        <div>
+          <label className="block mb-1 font-medium" htmlFor="valdkond">
+            Idee valdkond
+          </label>
+          <select
+            id="valdkond"
+            name="valdkond"
+            value={form.valdkond}
+            onChange={handleChange}
+            required
+            className="w-full border rounded px-3 py-2"
+          >
+            <option value="">-- Vali valdkond --</option>
+            <option value="Rahvastiku areng">Rahvastiku areng</option>
+            <option value="Looduskeskkond">Looduskeskkond</option>
+            <option value="Kultuur">Kultuur</option>
+            <option value="Sport">Sport</option>
+            <option value="Ettevõtlus">Ettevõtlus</option>
+            <option value="Elukeskkond">Elukeskkond</option>
+            <option value="Avalikud teenused">Avalikud teenused</option>
+            <option value="Haridus">Haridus</option>
+            <option value="Muu">Muu</option>
+          </select>
+        </div>
+
         <div>
           <label className="block mb-1 font-medium" htmlFor="kirjeldus">
             Idee kirjeldus
