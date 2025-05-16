@@ -410,9 +410,14 @@ export default function Arengukava() {
         </div>
         
         {/* Idea Editor Popup */}
-        {selectedIdea && editedIdea && (
-          <div className="fixed inset-0 bg-black bg-opacity-30 flex items-center justify-center z-50">
-            <div className="bg-white rounded-lg p-8 w-full max-w-xl relative">
+        {selectedIdea && editedIdea && (          <div 
+            className="fixed inset-0 backdrop-blur-[2px] flex items-center justify-center z-50 pointer-events-auto"
+            onClick={handleClosePopup}
+          >
+            <div 
+              className="bg-white rounded-lg p-8 w-full max-w-xl relative border-2 border-black shadow-xl"
+              onClick={(e) => e.stopPropagation()} 
+            >
               {/* Close Button */}
               <button 
                 onClick={handleClosePopup}
