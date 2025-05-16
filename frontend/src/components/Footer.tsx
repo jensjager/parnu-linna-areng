@@ -5,11 +5,11 @@ export default function Footer() {
   const currentYear = new Date().getFullYear();
 
   return (
-    <footer className="bg-gray-800 text-white mt-12">
-      <div className="container mx-auto px-4 py-8">
+    <footer className="bg-primary text-white">
+      <div className="container px-4 sm:px-6 md:px-8 lg:px-16 xl:px-24  py-8">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           <div>
-            <h3 className="text-xl font-semibold mb-4">Pärnu Kogukond</h3>
+            <h3 className="text-xl font-semibold mb-4">Pärnu Linnavalitsus</h3>
             <p className="text-gray-300">
               Kogukonna platvorm, kus saad jagada ideid ja osaleda linna
               arengus.
@@ -72,9 +72,9 @@ export default function Footer() {
             </address>
           </div>
         </div>
-
-        <div className="border-t border-gray-700 mt-8 pt-6 text-center text-gray-400">
-          <p>© {currentYear} Pärnu Kogukonna Hub. Kõik õigused kaitstud.</p>
+        <div className="my-8 w-full bg-white h-[1px]"></div>
+        <div className="text-center text--400">
+          <p>© {currentYear} Pärnu Linnavalitsus. Kõik õigused kaitstud.</p>
         </div>
       </div>
     </footer>
