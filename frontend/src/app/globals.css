@@ -4,9 +4,8 @@
 :root {
   --background: #ffffff;
   --foreground: #171717;
-}
-
-@theme inline {
+  --color-primary: #1a78be;
+  --color-white: #fff8f8;
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --font-sans: var(--font-geist-sans);
@@ -18,11 +17,6 @@
     --background: #0a0a0a;
     --foreground: #ededed;
   }
-}
-
-@theme {
-  --color-primary: #1a78be;
-  --color-white: #fff8f8;
 }
 
 body {
