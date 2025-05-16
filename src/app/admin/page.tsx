@@ -257,7 +257,8 @@ export default function Arengukava() {
 
   if (!authenticated) {
     return (
-      <div className="grid place-items-center min-h-screen p-8 font-[family-name:var(--font-geist-sans)]">        <div className="w-full max-w-md p-8 space-y-8 bg-white rounded-lg shadow-md">
+      <div className="grid place-items-center min-h-screen p-8 font-[family-name:var(--font-geist-sans)]">        
+      <div className="w-full max-w-md p-8 space-y-8 bg-white rounded-lg shadow-md">
           <h2 className="text-2xl font-bold text-center text-black">Admin ligipääs</h2>
           <form onSubmit={handleSubmit} className="mt-8 space-y-6">
             <div>
@@ -289,7 +290,7 @@ export default function Arengukava() {
     );
   }  return (
     <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">      <main className="flex flex-col gap-[32px] row-start-2 items-center w-full max-w-6xl">
-        <h1 className="text-4xl font-bold text-white">Ideedehaldur</h1>
+        <h1 className="text-4xl font-bold text-black">Ideedehaldur</h1>
         
         {/* Search and Filter Controls */}
         <div className="w-full flex flex-col sm:flex-row gap-4">
@@ -337,7 +338,7 @@ export default function Arengukava() {
         
         {/* Ideas Grid */}
         <div className="w-full">
-          <h2 className="text-2xl font-bold mb-4 text-white">Ideed</h2>          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 mb-6">
+          <h2 className="text-2xl font-bold mb-4 text-black">Ideed</h2>          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 mb-6">
             {currentIdeas.length > 0 ? (
               currentIdeas.map((idea) => (
                 <div 
@@ -359,7 +360,7 @@ export default function Arengukava() {
               ))
             ) : (
               <div className="col-span-full text-center py-8">
-                <p className="text-white text-lg">Ei leitud ühtegi sobivat ideed</p>
+                <p className="text-black text-lg">Ei leitud ühtegi sobivat ideed</p>
                 <button 
                   onClick={() => {
                     setSearchTerm('');
@@ -410,7 +411,7 @@ export default function Arengukava() {
         
         {/* Idea Editor Popup */}
         {selectedIdea && editedIdea && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="fixed inset-0 bg-black bg-opacity-30 flex items-center justify-center z-50">
             <div className="bg-white rounded-lg p-8 w-full max-w-xl relative">
               {/* Close Button */}
               <button 
