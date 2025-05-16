@@ -17,91 +17,36 @@ interface Sektor {
   nimi: string;
 }
 
-/**
- * API Call Required:
- * GET /api/sektorid
- * Fetches all sectors from the database
- * Returns array of Sektor objects: { id: number, nimi: string }[]
- */
-const sektorid: Sektor[] = [
-  { id: 1, nimi: "Rahvastiku areng" },
-  { id: 2, nimi: "Looduskeskkond" },
-  { id: 3, nimi: "Kultuur" },
-  { id: 4, nimi: "Sport" },
-  { id: 5, nimi: "Ettevõtlus" },
-  { id: 6, nimi: "Elukeskkond" },
-  { id: 7, nimi: "Avalikud teenused" },
-  { id: 8, nimi: "Haridus" },
-  { id: 9, nimi: "Muu"}
+// API base URL - this should point to your backend server
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000/api';
+
+// Mock data for testing when the backend is not available
+const MOCK_SECTORS: Sektor[] = [
+  { id: 1, nimi: 'Majandus' },
+  { id: 2, nimi: 'Keskkond' },
+  { id: 3, nimi: 'Transport' },
+  { id: 4, nimi: 'Haridus' },
+  { id: 5, nimi: 'Kultuur' },
+  { id: 6, nimi: 'Muu' }
 ];
 
-// Estonian city development idea names
-const ideePealkirjad = [
-  "Koerapark Endla tänavale",
-  "Ujuv promenaad Pärnu jõele",
-  "Tasuta WiFi kõikidesse parkidesse",
-  "Uued matemaatikaõpikud algkoolidele",
-  "Pärnu jõeäärne kergliiklustee",
-  "Raeküla raamatukogu renoveerimine",
-  "Vanalinna tänavate uus valgustus",
-  "Sõudeklubi varustuse uuendamine",
-  "Eakate päevakeskuse laiendamine",
-  "Mai linnaosa mänguväljakute uuendamine",
-  "Linnaliinibusside elektrifitseerimine",
-  "Kesklinna uus avalik tualett",
-  "Ettevõtlusinkubaatori rajamine",
-  "Ranna-ala korrashoid ja laiendamine",
-  "Kaasava eelarve rakendamine",
-  "Koolinoorte ettevõtlusprogramm",
-  "Linna äärealal elavate eakate transpordivõimaluste parandamine",
-  "Pärnu jõe kallaste korrastamine",
-  "Linnavalitsusega suhtlemise digitaliseerimise projekt",
-  "Terviseradade laiendamine ja uuendamine",
-  "Rattalaenutuse süsteemi rajamine",
-  "Lasteaedade mänguväljakute kaasajastamine",
-  "Linna üürikorterite programm noortele peredele",
-  "Turismiinfopunkti uuendamine kesklinnas",
-  "Loomade varjupaiga laiendamine ja renoveerimine",
-  "Pärnu Keskraamatukogu digitaliseerimisprojekt",
-  "Linna perearstikeskuse renoveerimine",
-  "Noorte loovkeskuse asutamine",
-  "Majaomanike fassaaditoetuse programm",
-  "Pärnu muusikakooli pilli soetustoetus",
-  "Erivajadustega inimeste ligipääsu parandamine avalikele hoonetele",
-  "Avalike spordiplatside väljaehitamine",
-  "Haigla juurdeehituse planeerimine",
-  "Pärnu jõe äärne puhkeala",
-  "Päikeseenergia paneelid koolikatustele",
-  "Kesklinna taimeaianduse projekt",
-  "Võrgustik istutatavate puude ja põõsaste jaoks",
-  "Kogukonna aiandusprojektid",
-  "Turismi toetamine madalhooajal",
-  "Noorte programmeerimise ja tehnoloogia programm"
+const MOCK_IDEAS: Idea[] = [
+  { id: 1, pealkiri: 'Pärnu ranna laiendamine', kirjeldus: 'Pärnu ranna laiendamine Mere puiestee suunas, et mahutada rohkem külastajaid suvehooajal ja vähendada ülerahvastatust tipphetkedel.', hääletusel: true, sektorId: 2 },
+  { id: 2, pealkiri: 'Koerte park kesklinna', kirjeldus: 'Rajada kesklinna lähedale täielikult tarastatud koerte jalutusala, kus koerad saaksid vabalt joosta. Parki võiks lisada ka treeningvahendid ja joogikohad.', hääletusel: false, sektorId: 2 },
+  { id: 3, pealkiri: 'Rattalaenutus süsteemi laiendamine', kirjeldus: 'Laiendada olemasolevat rattalaenutuse süsteemi, et see kataks ka äärelinnad ja populaarsed turismikohad.', hääletusel: true, sektorId: 3 },
+  { id: 4, pealkiri: 'Avalikud WiFi punktid randades', kirjeldus: 'Paigaldada tasuta WiFi levialad kõikidesse Pärnu randadesse, et turistid ja kohalikud saaksid mugavalt internetti kasutada.', hääletusel: false, sektorId: 5 },
+  { id: 5, pealkiri: 'Rohkem prügikaste kesklinnas', kirjeldus: 'Paigaldada rohkem prügikaste ja sorteerimiskonteinereid kesklinna piirkonda, eriti suure käidavusega aladele nagu promenaad ja rannapark.', hääletusel: false, sektorId: 2 },
+  { id: 6, pealkiri: 'Talvine uisuväljak jõe äärde', kirjeldus: 'Rajada talveperioodiks suur uisuväljak jõe äärde, mis oleks valgustatud ja kus mängiks muusika. See tooks linna talvel rohkem elu.', hääletusel: false, sektorId: 5 },
+  { id: 7, pealkiri: 'Elektritõukerataste parkimisalad', kirjeldus: 'Määrata kindlad parkimisalad elektritõukeratastele, et vähendada nende juhuslikku parkimist kõnniteedel ja muudes kohtades, mis takistab jalakäijaid.', hääletusel: true, sektorId: 3 },
+  { id: 8, pealkiri: 'Rannapromenaadi pikendamine', kirjeldus: 'Pikendada rannapromenaadi Mai rajooni suunas, et luua ühtne jalutustee piki kogu randa.', hääletusel: true, sektorId: 2 },
+  { id: 9, pealkiri: 'Rohkem lasteaedu', kirjeldus: 'Rajada linna juurde vähemalt kaks uut lasteaeda, sest olemasolevad on ülerahvastatud ja kohti ei jätku kõigile soovijatele.', hääletusel: true, sektorId: 4 },
+  { id: 10, pealkiri: 'Avalik saun rannas', kirjeldus: 'Ehitada ranna lähedusse avalik saun, mida saaksid kasutada nii kohalikud kui turistid, eriti talveujujad.', hääletusel: false, sektorId: 5 },
+  { id: 11, pealkiri: 'Luteri kiriku torni vaateplatvorm', kirjeldus: 'Avada Eliisabeti kiriku torn külastajatele, et pakkuda ilusat vaadet linnale ja merele. See tooks juurde turiste ja täiendavat tulu kirikule.', hääletusel: true, sektorId: 5 },
+  { id: 12, pealkiri: 'Linna ettevõtluse toetusprogramm', kirjeldus: 'Luua spetsiaalne toetusprogramm kohalikele väikeettevõtetele, et soodustada uute töökohtade loomist ja äride alustamist.', hääletusel: true, sektorId: 1 }
 ];
 
-// Mock data for ideas - this would be replaced with actual API data
-/**
- * API Call Required:
- * GET /api/ideed?page={pageNumber}&limit={limit}
- * Fetches paginated list of ideas from database
- * Optional query parameters: sektorId, hääletusel
- * Returns: { data: Idea[], total: number, page: number, totalPages: number }
- */
-const mockIdeas: Idea[] = Array.from({ length: 45 }, (_, i) => ({
-  id: i + 1,
-  pealkiri: ideePealkirjad[i] || `Idee ${i + 1}`,
-  kirjeldus: `See on idee number ${i + 1} kirjeldus. Siin on rohkem infot idee kohta.`,
-  hääletusel: Math.random() > 0.5,
-  sektorId: Math.floor(Math.random() * 6) + 1
-}));
- /**
- * Admin authentication is handled using environment variables
- * Required env variables:
- * - NEXT_PUBLIC_ADMIN_PASSWORD: The password for admin access
- * 
- * These should be stored in .env.local file which is not committed to the repository
- * For production, set these values in your hosting platform's environment variables
- */
+// Empty placeholder until we load from the API
+const sektorid: Sektor[] = [];
 
 export default function Arengukava() {
   const [authenticated, setAuthenticated] = useState(false);
@@ -109,152 +54,298 @@ export default function Arengukava() {
   const [error, setError] = useState('');
   
   // State for ideas management
-  const [ideas, setIdeas] = useState<Idea[]>(mockIdeas);
+  const [ideas, setIdeas] = useState<Idea[]>([]);
+  const [sectors, setSectors] = useState<Sektor[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [selectedIdea, setSelectedIdea] = useState<Idea | null>(null);
   const [editedIdea, setEditedIdea] = useState<Idea | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedSector, setSelectedSector] = useState<number | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalIdeas, setTotalIdeas] = useState(0);
   const ideasPerPage = 20;
-  /**
-   * API Integration Required:
-   * 1. On component mount, fetch sectors with GET /api/sektorid
-   * 2. On component mount or when page changes, fetch ideas with GET /api/ideed?page={currentPage}&limit={ideasPerPage}
-   * 
-   * Example implementation:
-   * useEffect(() => {
-   *   async function fetchData() {
-   *     try {
-   *       const response = await fetch(`/api/ideed?page=${currentPage}&limit=${ideasPerPage}`);
-   *       const data = await response.json();
-   *       setIdeas(data.data);
-   *     } catch (error) {
-   *       console.error("Error fetching ideas:", error);
-   *     }
-   *   }
-   *   
-   *   fetchData();
-   * }, [currentPage]);
-   */
-
-  // Filter ideas based on search term and selected sector
-  const filteredIdeas = ideas.filter((idea) => {
-    // Apply search filter
-    const matchesSearch = searchTerm === '' || 
-      idea.pealkiri.toLowerCase().includes(searchTerm.toLowerCase()) || 
-      idea.kirjeldus.toLowerCase().includes(searchTerm.toLowerCase());
+    // Fetch sectors on component mount
+  useEffect(() => {
+    async function fetchSectors() {
+      try {
+        const response = await fetch(`${API_BASE_URL}/sektorid`);
+        if (!response.ok) {
+          throw new Error('Failed to fetch sectors');
+        }
+        const data = await response.json();
+        setSectors(data);
+      } catch (error) {
+        console.error("Error fetching sectors:", error);
+        // Fallback to mock data
+        setSectors(MOCK_SECTORS);
+      }
+    }
     
-    // Apply sector filter
-    const matchesSector = selectedSector === null || idea.sektorId === selectedSector;
+    fetchSectors();
+  }, []);
+    // Fetch ideas when page, search term, or selected sector changes
+  useEffect(() => {
+    if (!authenticated) return; // Don't fetch if not authenticated
     
-    // Return true if the idea matches both filters
-    return matchesSearch && matchesSector;
-  });
-
-  // Get current ideas based on pagination
-  const indexOfLastIdea = currentPage * ideasPerPage;
-  const indexOfFirstIdea = indexOfLastIdea - ideasPerPage;
-  const currentIdeas = filteredIdeas.slice(indexOfFirstIdea, indexOfLastIdea);
+    async function fetchIdeas() {
+      setLoading(true);      try {
+        // Build the query URL with parameters
+        let url = `${API_BASE_URL}/ideed?page=${currentPage}&limit=${ideasPerPage}`;
+        
+        if (selectedSector !== null) {
+          url += `&sektorId=${selectedSector}`;
+        }
+        
+        if (searchTerm.trim() !== '') {
+          url += `&searchTerm=${encodeURIComponent(searchTerm.trim())}`;
+        }
+        
+        const response = await fetch(url);
+        if (!response.ok) {
+          throw new Error('Failed to fetch ideas');
+        }
+        
+        const data = await response.json();
+        setIdeas(data.data);
+        setTotalPages(data.totalPages);
+        setTotalIdeas(data.total);
+      } catch (error) {
+        console.error("Error fetching ideas:", error);
+        // Fallback to mock data
+        setIdeas(MOCK_IDEAS);
+        setTotalPages(1);
+        setTotalIdeas(MOCK_IDEAS.length);
+      } finally {
+        setLoading(false);
+      }
+    }
+      fetchIdeas();
+  }, [currentPage, selectedSector, authenticated, searchTerm]);
+  // The search is now handled by the backend
+  const filteredIdeas = ideas;
   // Handle opening the idea editor popup
-  const handleIdeaClick = (idea: Idea) => {
-    setSelectedIdea(idea);
-    setEditedIdea({ ...idea });
-    
-    /**
-     * API Call Required:
-     * GET /api/ideed/{idea.id}
-     * Fetches detailed information for a specific idea
-     * Returns: Idea object with all fields
-     * 
-     * This would be useful if the list view doesn't contain all the data needed
-     * for editing (e.g., longer description fields, metadata, etc.)
-     */
+  const handleIdeaClick = async (idea: Idea) => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/ideed/${idea.id}`);
+      if (!response.ok) {
+        throw new Error('Failed to fetch idea details');
+      }
+      
+      const ideaDetails = await response.json();
+      setSelectedIdea(ideaDetails);
+      setEditedIdea({ ...ideaDetails });
+    } catch (error) {
+      console.error("Error fetching idea details:", error);
+      // Fallback to the list item data if detailed fetch fails
+      setSelectedIdea(idea);
+      setEditedIdea({ ...idea });
+    }
   };
 
   const handleClosePopup = () => {
     setSelectedIdea(null);
     setEditedIdea(null);
   };
-  const handleSaveIdea = () => {
+    const handleSaveIdea = async () => {
     if (!editedIdea) return;
+    
+    try {
+      const response = await fetch(`${API_BASE_URL}/ideed/${editedIdea.id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(editedIdea)
+      });
+      
+      if (!response.ok) {
+        throw new Error('Failed to update idea');
+      }
+      
+      const updatedIdea = await response.json();
+      
+      // Update local state
       setIdeas(ideas.map(idea => 
-      idea.id === editedIdea.id ? editedIdea : idea
-    ));
+        idea.id === updatedIdea.id ? updatedIdea : idea
+      ));
+      
+      handleClosePopup();
+      
+      // Show success notification
+      showNotification('Idee edukalt uuendatud!', 'success');
+    } catch (error) {
+      console.error("Error updating idea:", error);
+      // Show error message to user
+      alert("Viga idee uuendamisel. Palun proovi uuesti.");
+    }
+  };
+  
+  // Function to delete an idea
+  const handleDeleteIdea = async () => {
+    if (!editedIdea) return;
     
-    /**
-     * API Call Required:
-     * PUT /api/ideed/{editedIdea.id}
-     * Updates an idea in the database
-     * Request body: Idea object with updated fields
-     * Returns: Updated Idea object
-     * 
-     * Example implementation:
-     * try {
-     *   const response = await fetch(`/api/ideed/${editedIdea.id}`, {
-     *     method: 'PUT',
-     *     headers: { 'Content-Type': 'application/json' },
-     *     body: JSON.stringify(editedIdea)
-     *   });
-     *   
-     *   if (!response.ok) {
-     *     throw new Error('Failed to update idea');
-     *   }
-     *   
-     *   const updatedIdea = await response.json();
-     *   // Update the local state
-     *   setIdeas(ideas.map(idea => idea.id === updatedIdea.id ? updatedIdea : idea));
-     * } catch (error) {
-     *   console.error("Error updating idea:", error);
-     *   // Show error message to user
-     * }
-     */
+    if (!confirm("Kas olete kindel, et soovite selle idee kustutada? Seda toimingut ei saa tagasi võtta.")) {
+      return;
+    }
     
-    handleClosePopup();
-  };    const handleSubmit = (e: React.FormEvent) => {    
+    try {
+      const response = await fetch(`${API_BASE_URL}/ideed/${editedIdea.id}`, {
+        method: 'DELETE',
+      });
+      
+      if (!response.ok) {
+        throw new Error('Failed to delete idea');
+      }
+      
+      // Update local state
+      setIdeas(ideas.filter(idea => idea.id !== editedIdea.id));
+      
+      handleClosePopup();
+      
+      // Force refresh of idea listing
+      setCurrentPage(1);
+      
+      // Show success notification
+      showNotification('Idee edukalt kustutatud!', 'success');
+    } catch (error) {
+      console.error("Error deleting idea:", error);
+      alert("Viga idee kustutamisel. Palun proovi uuesti.");
+    }
+  };
+    // Initialize a new empty idea
+  const initializeNewIdea = () => {
+    const newIdea: Idea = {
+      id: 0, // This will be assigned by the database on creation
+      pealkiri: '',
+      kirjeldus: '',
+      hääletusel: false,
+      sektorId: 6 // Default to "Muu" (Other) sector
+    };
+    
+    setSelectedIdea(newIdea);
+    setEditedIdea(newIdea);
+  };
+  // Function to create a new idea
+  const handleCreateIdea = async () => {
+    if (!editedIdea) return;
+    
+    try {
+      const response = await fetch(`${API_BASE_URL}/ideed`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(editedIdea)
+      });
+      
+      if (!response.ok) {
+        throw new Error('Failed to create idea');
+      }
+      
+      const createdIdea = await response.json();
+      
+      // Update local state if it's on the first page
+      if (currentPage === 1) {
+        setIdeas([createdIdea, ...ideas].slice(0, ideasPerPage));
+      } else {
+        // If not on first page, navigate to first page to see the new idea
+        setCurrentPage(1);
+      }
+      
+      handleClosePopup();
+      
+      // Show success notification
+      showNotification('Idee edukalt loodud!', 'success');
+    } catch (error) {
+      console.error("Error creating idea:", error);
+      
+      // When backend is unavailable, create mock data for testing purposes
+      if (window.confirm("Ei õnnestunud ideed luua. Võimalik, et server pole kättesaadav. Kas soovid lisada test-idee?")) {
+        const mockId = Math.floor(Math.random() * 10000) + 100;
+        const mockNewIdea = {
+          ...editedIdea,
+          id: mockId
+        };
+        
+        setIdeas([mockNewIdea, ...ideas].slice(0, ideasPerPage));
+        handleClosePopup();
+      } else {
+        alert("Viga idee loomisel. Palun proovi uuesti.");
+      }
+    }
+  };
+    const handleSubmit = (e: React.FormEvent) => {    
     e.preventDefault();
-    const adminPassword = process.env.NEXT_PUBLIC_ADMIN_PASSWORD;
+    const adminPassword = process.env.NEXT_PUBLIC_ADMIN_PASSWORD || 'admin123'; // Fallback for development
     
     if (password === adminPassword) {
       setAuthenticated(true);
       setError('');
-      
-      /**
-       * API Call Required:
-       * POST /api/auth/login
-       * Authenticates admin user
-       * Request body: { password: string }
-       * Returns: { token: string, user: { id: number, role: string } }
-       * 
-       * The token should be stored (localStorage or httpOnly cookie) and
-       * included in subsequent API requests for authentication.
-       * 
-       * Example implementation:
-       * try {
-       *   const response = await fetch('/api/auth/login', {
-       *     method: 'POST',
-       *     headers: { 'Content-Type': 'application/json' },
-       *     body: JSON.stringify({ password })
-       *   });
-       *   
-       *   if (!response.ok) {
-       *     throw new Error('Authentication failed');
-       *   }
-       *   
-       *   const { token } = await response.json();
-       *   localStorage.setItem('adminToken', token);
-       *   setAuthenticated(true);
-       *   setError('');
-       * } catch (error) {
-       *   setError('Vale parool, palun proovi uuesti.');
-       *   setPassword('');
-       * }
-       */
     } else {
       setError('Vale parool, palun proovi uuesti.');
       setPassword('');
     }
   };
 
+  // State for notifications
+  const [notification, setNotification] = useState<{message: string; type: 'success' | 'error'} | null>(null);
+  
+  // Function to show notification
+  const showNotification = (message: string, type: 'success' | 'error') => {
+    setNotification({ message, type });
+    // Auto-hide after 5 seconds
+    setTimeout(() => {
+      setNotification(null);
+    }, 5000);
+  };
+    // Function to refresh ideas list
+  const refreshIdeas = () => {
+    setCurrentPage(1);
+    fetchIdeasData(1);
+  };
+
+  // Function to reset all filters
+  const resetFilters = () => {
+    setSearchTerm('');
+    setSelectedSector(null);
+    setCurrentPage(1);
+    // After setting state to null, manually fetch to ensure we get unfiltered data
+    setTimeout(() => fetchIdeasData(1), 0);
+  };
+
+  // Function to fetch ideas data to reuse in multiple places
+  const fetchIdeasData = async (page: number) => {
+    setLoading(true);
+    try {      // Build the query URL with parameters
+      let url = `${API_BASE_URL}/ideed?page=${page}&limit=${ideasPerPage}`;
+      
+      if (selectedSector !== null) {
+        url += `&sektorId=${selectedSector}`;
+        console.log('Filtering by sector:', selectedSector);
+      }
+      
+      if (searchTerm.trim() !== '') {
+        url += `&searchTerm=${encodeURIComponent(searchTerm.trim())}`;
+      }
+      
+      console.log('Fetching ideas with URL:', url);
+      const response = await fetch(url);
+      if (!response.ok) {
+        throw new Error('Failed to fetch ideas');
+      }
+      
+      const data = await response.json();
+      setIdeas(data.data);
+      setTotalPages(data.totalPages);
+      setTotalIdeas(data.total);
+    } catch (error) {
+      console.error("Error fetching ideas:", error);
+      // Fallback to mock data
+      setIdeas(MOCK_IDEAS);
+      setTotalPages(1);
+      setTotalIdeas(MOCK_IDEAS.length);
+    } finally {
+      setLoading(false);
+    }
+  };
+  
   if (!authenticated) {
     return (
       <div className="grid place-items-center min-h-screen p-8 font-[family-name:var(--font-geist-sans)]">        
@@ -279,7 +370,7 @@ export default function Arengukava() {
             {error && <p className="text-sm text-red-600">{error}</p>}
             <div>              <button
                 type="submit"
-                className="w-full px-4 py-2 text-black bg-blue-600 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                className="w-full px-4 py-2 text-white bg-blue-600 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
               >
                 Sisene
               </button>
@@ -316,18 +407,18 @@ export default function Arengukava() {
           </div>
           
           {/* Sector Filter */}
-          <div className="w-full sm:w-64">
-            <select
+          <div className="w-full sm:w-64">            <select
               className="block w-full p-3 text-sm text-black border border-gray-300 rounded-lg bg-white"
               value={selectedSector === null ? '' : selectedSector}
               onChange={(e) => {
                 const value = e.target.value === '' ? null : Number(e.target.value);
+                console.log('Selected sector value:', value);
                 setSelectedSector(value);
                 setCurrentPage(1); // Reset to first page when filtering
               }}
             >
               <option value="">Kõik sektorid</option>
-              {sektorid.map(sektor => (
+              {sectors.map(sektor => (
                 <option key={sektor.id} value={sektor.id}>
                   {sektor.nimi}
                 </option>
@@ -337,84 +428,89 @@ export default function Arengukava() {
         </div>
         
         {/* Ideas Grid */}
-        <div className="w-full">
-          <h2 className="text-2xl font-bold mb-4 text-black">Ideed</h2>          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 mb-6">
-            {currentIdeas.length > 0 ? (
-              currentIdeas.map((idea) => (
-                <div 
-                  key={idea.id}
-                  onClick={() => handleIdeaClick(idea)}
-                  className="bg-white p-4 rounded-md shadow cursor-pointer hover:shadow-md transition-shadow border border-gray-200"
-                >
-                  <h3 className="font-medium text-black line-clamp-2 h-12">{idea.pealkiri}</h3>
-                  <div className="flex flex-col gap-1 mt-2">
-                    <div className="flex items-center">
-                      <div className={`h-3 w-3 rounded-full mr-2 ${idea.hääletusel ? 'bg-green-500' : 'bg-gray-300'}`}></div>
-                      <span className="text-sm text-gray-600">{idea.hääletusel ? 'Hääletusel' : 'Ei ole hääletusel'}</span>
-                    </div>
-                    <div className="text-sm text-gray-600 mt-1">
-                      <span className="font-medium">Sektor:</span> {sektorid.find(s => s.id === idea.sektorId)?.nimi}
-                    </div>
-                  </div>
-                </div>
-              ))
-            ) : (
-              <div className="col-span-full text-center py-8">
-                <p className="text-black text-lg">Ei leitud ühtegi sobivat ideed</p>
-                <button 
-                  onClick={() => {
-                    setSearchTerm('');
-                    setSelectedSector(null);
-                  }}
-                  className="mt-4 px-4 py-2 bg-blue-600 text-black rounded-md hover:bg-blue-700"
-                >
-                  Lähtesta otsingufiltrid
-                </button>
-              </div>
-            )}
-          </div>{/* Pagination */}
-          <div className="flex justify-center mt-6">
-            {filteredIdeas.length > 0 ? (
-              <>
-                {Array.from({ length: Math.ceil(filteredIdeas.length / ideasPerPage) }, (_, i) => (
-                  <button 
-                    key={i + 1}
-                    onClick={() => setCurrentPage(i + 1)}
-                    disabled={currentPage === i + 1}
-                    className="px-4 py-2 mx-1 bg-white text-black border border-gray-300 rounded-md disabled:opacity-50"
-                  >
-                    {i + 1}
-                  </button>
-                ))}
-              </>
-            ) : (
-              <p className="text-white">Ei leitud ühtegi sobivat ideed</p>
-            )}
-            {/**
-             * Pagination API Integration:
-             * The API should return total count and total pages
-             * Then generate pagination buttons dynamically:
-             * 
-             * {Array.from({ length: totalPages }, (_, i) => (
-             *   <button
-             *     key={i + 1}
-             *     onClick={() => setCurrentPage(i + 1)}
-             *     disabled={currentPage === i + 1}
-             *     className="px-4 py-2 mx-1 bg-white text-black border border-gray-300 rounded-md disabled:opacity-50"
-             *   >
-             *     {i + 1}
-             *   </button>
-             * ))}
-             */}
+        <div className="w-full">          <div className="flex justify-between items-center mb-4">
+            <h2 className="text-2xl font-bold text-black">Ideed</h2>
+            <div className="flex gap-2">
+              <button 
+                onClick={refreshIdeas}
+                className="px-4 py-2 bg-gray-200 text-black rounded-md hover:bg-gray-300"
+                title="Värskenda ideid"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                </svg>
+              </button>
+              <button 
+                onClick={initializeNewIdea}
+                className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+              >
+                Lisa uus idee
+              </button>
+            </div>
           </div>
+          
+          {loading ? (
+            <div className="flex justify-center items-center py-12">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-700"></div>
+            </div>
+          ) : (
+            <>
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 mb-6">
+                {filteredIdeas.length > 0 ? (
+                  filteredIdeas.map((idea) => (
+                    <div 
+                      key={idea.id}
+                      onClick={() => handleIdeaClick(idea)}
+                      className="bg-white p-4 rounded-md shadow cursor-pointer hover:shadow-md transition-shadow border border-gray-200"
+                    >
+                      <h3 className="font-medium text-black line-clamp-2 h-12">{idea.pealkiri}</h3>
+                      <div className="flex flex-col gap-1 mt-2">
+                        <div className="flex items-center">
+                          <div className={`h-3 w-3 rounded-full mr-2 ${idea.hääletusel ? 'bg-green-500' : 'bg-gray-300'}`}></div>
+                          <span className="text-sm text-gray-600">{idea.hääletusel ? 'Hääletusel' : 'Ei ole hääletusel'}</span>
+                        </div>
+                        <div className="text-sm text-gray-600 mt-1">
+                          <span className="font-medium">Sektor:</span> {sectors.find(s => s.id === idea.sektorId)?.nimi || 'Määramata'}
+                        </div>
+                      </div>
+                    </div>
+                  ))
+                ) : (                  <div className="col-span-full text-center py-8">
+                    <p className="text-black text-lg">Ei leitud ühtegi sobivat ideed</p>
+                    <button 
+                      onClick={resetFilters}
+                      className="mt-4 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+                    >
+                      Lähtesta otsingufiltrid
+                    </button>
+                  </div>
+                )}
+              </div>
+              
+              {/* Pagination */}
+              {totalPages > 1 && (
+                <div className="flex justify-center mt-6">
+                  {Array.from({ length: totalPages }, (_, i) => (
+                    <button 
+                      key={i + 1}
+                      onClick={() => setCurrentPage(i + 1)}
+                      disabled={currentPage === i + 1}
+                      className="px-4 py-2 mx-1 bg-white text-black border border-gray-300 rounded-md disabled:opacity-50"
+                    >
+                      {i + 1}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </>
+          )}
         </div>
         
         {/* Idea Editor Popup */}
         {selectedIdea && editedIdea && (          <div 
             className="fixed inset-0 backdrop-blur-[2px] flex items-center justify-center z-50 pointer-events-auto"
             onClick={handleClosePopup}
-          >
-            <div 
+          >            <div 
               className="bg-white rounded-lg p-8 w-full max-w-xl relative border-2 border-black shadow-xl"
               onClick={(e) => e.stopPropagation()} 
             >
@@ -428,8 +524,11 @@ export default function Arengukava() {
                 </svg>
               </button>
               
-              <h2 className="text-2xl font-bold mb-6 text-black">Muuda ideed #{editedIdea.id}</h2>
-                {/* Title Input */}
+              <h2 className="text-2xl font-bold mb-6 text-black">
+                {editedIdea.id === 0 ? 'Lisa uus idee' : `Muuda ideed #${editedIdea.id}`}
+              </h2>
+              
+              {/* Title Input */}
               <div className="mb-4">
                 <label htmlFor="pealkiri" className="block text-sm font-medium text-black mb-1">
                   Pealkiri:
@@ -454,7 +553,7 @@ export default function Arengukava() {
                   onChange={(e) => setEditedIdea({...editedIdea, sektorId: Number(e.target.value)})}
                   className="w-full p-2 border border-gray-300 rounded-md shadow-sm text-black"
                 >
-                  {sektorid.map(sektor => (
+                  {sectors.map(sektor => (
                     <option key={sektor.id} value={sektor.id}>
                       {sektor.nimi}
                     </option>
@@ -489,15 +588,31 @@ export default function Arengukava() {
                   Hääletusel
                 </label>
               </div>
-              
-              {/* Save Button */}
+                {/* Save Button */}
               <button
-                onClick={handleSaveIdea}
-                className="w-full py-2 bg-blue-600 text-black rounded-md hover:bg-blue-700 transition-colors"
+                onClick={editedIdea.id === 0 ? handleCreateIdea : handleSaveIdea}
+                className="w-full py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
               >
-                Salvesta
+                {editedIdea.id === 0 ? 'Lisa uus idee' : 'Salvesta muudatused'}
               </button>
+              
+              {/* Delete Button - only visible when editing an existing idea */}
+              {editedIdea.id !== 0 && (
+                <button
+                  onClick={handleDeleteIdea}
+                  className="w-full py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors mt-4"
+                >
+                  Kustuta idee
+                </button>
+              )}
             </div>
+          </div>
+        )}
+        
+        {/* Notification Toast */}
+        {notification && (
+          <div className={`fixed bottom-4 right-4 mb-4 mr-4 p-4 rounded-lg shadow-lg transition-all duration-300 ease-in-out ${notification.type === 'success' ? 'bg-green-500' : 'bg-red-500'}`}>
+            <p className="text-white text-sm font-medium">{notification.message}</p>
           </div>
         )}
       </main>
