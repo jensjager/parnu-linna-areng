@@ -9,6 +9,8 @@ export default function Home() {
       title: "Uus ideede konkurss kogukonna arendamiseks",
       date: "15. mai 2023",
       image: "/images/uudis1.jpg",
+      excerpt:
+        "Osale Pärnu linnaruumi parandamise ideede konkursil. Parimad ideed saavad rahastuse ja viime need ellu.",
       link: "/uudised/1",
     },
     {
@@ -16,6 +18,8 @@ export default function Home() {
       title: "Rannaala uuenduste avalik arutelu",
       date: "12. mai 2023",
       image: "/images/uudis2.jpg",
+      excerpt:
+        "Tule ja ütle sõna sekka Pärnu rannaalal planeeritavate muutuste kohta. Avalik arutelu toimub 25. mail.",
       link: "/uudised/2",
     },
     {
@@ -23,51 +27,78 @@ export default function Home() {
       title: "Suveürituste kava on avaldatud",
       date: "10. mai 2023",
       image: "/images/uudis3.jpg",
+      excerpt:
+        "Pärnu linna suvehooaja avalike ürituste kava on nüüd kättesaadav. Tutvu suviste sündmustega.",
       link: "/uudised/3",
     },
   ];
 
   // Quick links for services
   const teenused = [
-    { title: "Ideed", icon: "🚀", link: "/ideed" },
-    { title: "Küsitlused", icon: "📊", link: "/polls" },
-    { title: "Arengukava", icon: "📝", link: "/arengukava" },
-    { title: "Kalender", icon: "📅", link: "/kalender" },
+    {
+      title: "Esita idee",
+      icon: "💡",
+      link: "/ideed",
+      description: "Jaga oma mõtteid Pärnu linna arendamiseks",
+    },
+    {
+      title: "Osale küsitlustel",
+      icon: "📊",
+      link: "/polls",
+      description: "Avalda arvamust linnaelu puudutavates küsimustes",
+    },
+    {
+      title: "Arengukava",
+      icon: "📝",
+      link: "/arengukava",
+      description: "Tutvu Pärnu linna arengukavaga",
+    },
+    {
+      title: "Ürituste kalender",
+      icon: "🗓️",
+      link: "/kalender",
+      description: "Vaata tulevasi sündmusi ja üritusi",
+    },
+  ];
+
+  // Community statistics
+  const statistika = [
+    { number: "124", label: "Esitatud ideed" },
+    { number: "18", label: "Käimasolevad küsitlused" },
+    { number: "1,432", label: "Registreeritud kasutajat" },
+    { number: "37", label: "Teostatud projekti" },
   ];
 
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen bg-slate-50 relative -top-20">
       {/* Hero banner */}
-      <div className="relative h-[500px]">
-        <div className="absolute inset-0 bg-gradient-to-r from-blue-900/70 to-transparent z-10"></div>
-        <div className="absolute inset-0">
-          <Image
-            src="/images/parnu-hero.jpg"
-            alt="Pärnu linn"
-            fill
-            style={{ objectFit: "cover" }}
-            priority
-          />
-        </div>
-        <div className="relative z-20 container mx-auto px-4 h-full flex items-center">
-          <div className="max-w-xl text-white">
-            <h1 className="text-4xl md:text-5xl font-bold mb-4">
-              Pärnu Kogukond
+      <div className="relative h-[600px] bg-primary">
+        <div
+          className="absolute inset-0 blur-xl h-[580px]"
+          style={{
+            background:
+              "linear-gradient(143.6deg, rgba(192, 132, 252, 0.4) 15%, rgba(232, 121, 249, 0.6) 45%, rgba(204, 171, 238, 0.4) 75%)",
+          }}
+        ></div>
+        <div className="relative z-20 container mx-auto px-4 sm:px-6 md:px-8 lg:px-16 xl:px-24 h-full flex items-center">
+          <div className="max-w-2xl text-white">
+            <h1 className="text-4xl md:text-6xl font-bold mb-6">
+              Kujundame Pärnu tulevikku koos
             </h1>
-            <p className="text-xl mb-8">
-              Osale Pärnu linna arengus - jaga oma ideid, osale küsitlustel ja
-              aita kaasa meie linna tuleviku kujundamisel
+            <p className="text-xl md:text-2xl mb-10 leading-relaxed">
+              Osale Pärnu linna arengus - jaga ideid, osale küsitlustel ja aita
+              kaasa meie linna tuleviku kujundamisel
             </p>
             <div className="flex flex-wrap gap-4">
               <Link
                 href="/ideed"
-                className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-md font-medium transition-colors"
+                className="bg-white hover:bg-gray-100 text-[#1a78be] px-8 py-4 rounded-md font-bold text-lg transition-colors shadow-lg"
               >
                 Esita idee
               </Link>
               <Link
                 href="/polls"
-                className="bg-white hover:bg-gray-100 text-blue-900 px-6 py-3 rounded-md font-medium transition-colors"
+                className="bg-transparent hover:bg-white/10 text-white border-2 border-white px-8 py-4 rounded-md font-bold text-lg transition-colors"
               >
                 Osale küsitlusel
               </Link>
@@ -77,34 +108,56 @@ export default function Home() {
       </div>
 
       {/* Quick links section */}
-      <div className="bg-white py-10">
-        <div className="container mx-auto px-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="bg-white py-16">
+        <div className="container mx-auto px-4 sm:px-6 md:px-8 lg:px-16 xl:px-24">
+          <h2 className="text-3xl font-bold mb-12 text-center text-[#1a78be]">
+            Kuidas saad kaasa lüüa?
+          </h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
             {teenused.map((teenus, index) => (
               <Link
                 key={index}
                 href={teenus.link}
-                className="bg-gray-50 hover:bg-gray-100 p-6 rounded-lg flex items-center transition-colors"
+                className="bg-white hover:bg-slate-50 border border-slate-200 p-8 rounded-xl flex flex-col items-center text-center transition-all hover:shadow-md"
               >
-                <span className="text-3xl mr-4">{teenus.icon}</span>
-                <span className="font-medium text-lg">{teenus.title}</span>
+                <span className="text-5xl mb-4">{teenus.icon}</span>
+                <h3 className="font-bold text-xl mb-2 text-[#1a78be]">
+                  {teenus.title}
+                </h3>
+                <p className="text-slate-600">{teenus.description}</p>
               </Link>
             ))}
           </div>
         </div>
       </div>
 
+      {/* Statistics banner */}
+      <div className="bg-primary py-14">
+        <div className="container mx-auto px-4 sm:px-6 md:px-8 lg:px-16 xl:px-24">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+            {statistika.map((stat, index) => (
+              <div key={index} className="text-center">
+                <p className="text-5xl font-bold text-white mb-2">
+                  {stat.number}
+                </p>
+                <p className="text-white/80 text-lg">{stat.label}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+
       {/* News section */}
-      <div className="bg-gray-100 py-12">
-        <div className="container mx-auto px-4">
-          <h2 className="text-3xl font-bold mb-8 text-center">
+      <div className="bg-slate-50 py-16">
+        <div className="container mx-auto px-4 sm:px-6 md:px-8 lg:px-16 xl:px-24">
+          <h2 className="text-3xl font-bold mb-12 text-center text-[#1a78be]">
             Viimased uudised
           </h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {uudised.map((uudis) => (
               <Link href={uudis.link} key={uudis.id} className="group">
-                <div className="bg-white rounded-lg overflow-hidden shadow-md hover:shadow-lg transition-shadow">
-                  <div className="relative h-48">
+                <div className="bg-white rounded-xl overflow-hidden shadow-sm h-full hover:shadow-md transition-shadow flex flex-col">
+                  <div className="relative h-52">
                     <Image
                       src={uudis.image || "/images/placeholder.jpg"}
                       alt={uudis.title}
@@ -112,13 +165,32 @@ export default function Home() {
                       style={{ objectFit: "cover" }}
                     />
                   </div>
-                  <div className="p-4">
-                    <p className="text-sm text-gray-500 mb-2">{uudis.date}</p>
-                    <h3 className="text-xl font-semibold mb-2 group-hover:text-blue-600 transition-colors">
+                  <div className="p-6 flex-grow flex flex-col">
+                    <p className="text-sm text-slate-400 mb-2">{uudis.date}</p>
+                    <h3 className="text-xl font-semibold mb-3 group-hover:text-[#1a78be] transition-colors">
                       {uudis.title}
                     </h3>
-                    <span className="text-blue-600 font-medium">
-                      Loe rohkem →
+                    <p className="text-slate-600 mb-4 flex-grow">
+                      {uudis.excerpt}
+                    </p>
+                    <span className="text-[#1a78be] font-medium inline-flex items-center">
+                      Loe rohkem
+                      <svg
+                        width="20"
+                        height="20"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        xmlns="http://www.w3.org/2000/svg"
+                        className="ml-1"
+                      >
+                        <path
+                          d="M13.5 4.5L21 12M21 12L13.5 19.5M21 12H3"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        />
+                      </svg>
                     </span>
                   </div>
                 </div>
@@ -129,43 +201,21 @@ export default function Home() {
       </div>
 
       {/* Call-to-action section */}
-      <div className="bg-blue-700 text-white py-12">
-        <div className="container mx-auto px-4 text-center">
-          <h2 className="text-3xl font-bold mb-4">Liitu kogukonna aruteluga</h2>
-          <p className="text-xl max-w-2xl mx-auto mb-8">
+      <div className="bg-white py-16">
+        <div className="container mx-auto px-4 sm:px-6 md:px-8 lg:px-16 xl:px-24 text-center">
+          <h2 className="text-3xl font-bold mb-6 text-[#1a78be]">
+            Liitu kogukonna aruteluga
+          </h2>
+          <p className="text-xl max-w-2xl mx-auto mb-10 text-slate-600">
             Üheskoos saame aidata Pärnu linnal areneda ja paremaks muutuda. Sinu
-            ideed ja arvamus on olulised!
+            ideed ja arvamus on olulised meie kogukonna jaoks!
           </p>
           <Link
             href="/ideed"
-            className="bg-white hover:bg-gray-100 text-blue-700 px-8 py-3 rounded-md font-medium text-lg inline-block transition-colors"
+            className="bg-[#1a78be] hover:bg-[#1667a5] text-white px-8 py-4 rounded-md font-bold text-lg inline-block transition-colors shadow-md"
           >
             Jaga oma ideed
           </Link>
-        </div>
-      </div>
-
-      {/* Community statistics */}
-      <div className="bg-white py-12">
-        <div className="container mx-auto px-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 text-center">
-            <div>
-              <p className="text-4xl font-bold text-blue-600 mb-2">124</p>
-              <p className="text-gray-600">Esitatud ideed</p>
-            </div>
-            <div>
-              <p className="text-4xl font-bold text-blue-600 mb-2">18</p>
-              <p className="text-gray-600">Käimasolevad küsitlused</p>
-            </div>
-            <div>
-              <p className="text-4xl font-bold text-blue-600 mb-2">1,432</p>
-              <p className="text-gray-600">Kogukonna liiget</p>
-            </div>
-            <div>
-              <p className="text-4xl font-bold text-blue-600 mb-2">37</p>
-              <p className="text-gray-600">Teostatud projekti</p>
-            </div>
-          </div>
         </div>
       </div>
     </div>
