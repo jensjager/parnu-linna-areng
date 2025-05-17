@@ -5,12 +5,26 @@ type Poll = {
   id: string;
   question: string;
   description: string;
+  hääletusel?: boolean;
   options: { id: string; text: string; votes: number }[];
 };
 
 export default function PollsPage() {
   const [pollid, setPollid] = useState<Poll[]>([]);
-  const [valitud, setValitud] = useState<{ [pollId: string]: string }>({});  useEffect(() => {
+  const [valitud, setValitud] = useState<{ [pollId: string]: string }>({});
+  
+  // Load saved votes from localStorage on component mount
+  useEffect(() => {
+    // Check if we're in the browser environment
+    if (typeof window !== 'undefined') {
+      const savedVotes = localStorage.getItem('pollVotes');
+      if (savedVotes) {
+        setValitud(JSON.parse(savedVotes));
+      }
+    }
+  }, []);
+  
+  useEffect(() => {
     async function fetchPolls() {
       try {
         // Add cache-busting parameter to prevent browser caching
@@ -26,19 +40,20 @@ export default function PollsPage() {
         if (!Array.isArray(dataArray)) {
           console.error("Expected array of polls, got:", responseData);
           return;
-        }
-  
-        const transformed: Poll[] = dataArray.map((item: any) => ({
+        }        const transformed: Poll[] = dataArray.map((item: any) => ({
           id: String(item.id),
           question: item.pealkiri || "",
           description: item.kirjeldus || "",
+          hääletusel: item.hääletusel || false,
           options: [
             { id: "yes", text: "Poolt", votes: item.poolt || 0 },
             { id: "no", text: "Vastu", votes: item.vastu || 0 },
           ],
         }));
   
-        setPollid(transformed);
+        // Filter polls to only show those with hääletusel set to true
+        const filteredPolls = transformed.filter(poll => poll.hääletusel === true);
+        setPollid(filteredPolls);
       } catch (err) {
         console.error("Vigane andmete laadimine:", err);
       }
@@ -70,10 +85,14 @@ export default function PollsPage() {
           }),
         };
       })
-    );
-
-    // Update state of selections
-    setValitud((prev) => ({ ...prev, [pollId]: optionId }));
+    );    // Update state of selections
+    const updatedVotes = { ...valitud, [pollId]: optionId };
+    setValitud(updatedVotes);
+    
+    // Save to localStorage
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('pollVotes', JSON.stringify(updatedVotes));
+    }
     
     // Calculate new vote counts
     let pooltVotes = 0;
@@ -126,14 +145,15 @@ export default function PollsPage() {
             }
           : poll
       )
-    );
-
-    // Update state of selections
-    setValitud((prev) => {
-      const updated = { ...prev };
-      delete updated[pollId];
-      return updated;
-    });
+    );    // Update state of selections
+    const updatedVotes = { ...valitud };
+    delete updatedVotes[pollId];
+    setValitud(updatedVotes);
+    
+    // Update localStorage
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('pollVotes', JSON.stringify(updatedVotes));
+    }
 
     // Send vote removal to backend
     try {
@@ -149,16 +169,20 @@ export default function PollsPage() {
     } catch (error) {
       console.error("Error removing vote:", error);
     }
-  };
-
-  return (
+  };  return (
     <main className="max-w-2xl mx-auto py-8 px-4">
       <h1 className="text-3xl font-bold mb-6">Kogukonna küsitlused</h1>
-      {pollid.map((poll) => (
-        <div key={poll.id} className="mb-8 p-6 bg-white rounded shadow">
-          <h2 className="text-xl font-semibold mb-2">{poll.question}</h2>
-          <p className="text-gray-600 mb-4">{poll.description}</p>
-          <ul>
+      
+      {pollid.length === 0 ? (
+        <div className="text-center py-8">
+          <p className="text-gray-600">Hetkel pole ühtegi aktiivset hääletust.</p>
+        </div>
+      ) : (
+        pollid.map((poll) => (
+          <div key={poll.id} className="mb-8 p-6 bg-white rounded shadow">
+            <h2 className="text-xl font-semibold mb-2">{poll.question}</h2>
+            <p className="text-gray-600 mb-4">{poll.description}</p>
+            <ul>
             {poll.options.map((opt) => {
               const isSelected = valitud[poll.id] === opt.id;
               return (
@@ -199,10 +223,10 @@ export default function PollsPage() {
               >
                 Eemalda hääletus
               </button>
-            </div>
-          )}
+            </div>          )}
         </div>
-      ))}
+      ))
+      )}
     </main>
   );
 }
