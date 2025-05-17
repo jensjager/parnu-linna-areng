@@ -84,7 +84,7 @@ const ChatBox: React.FC = () => {
             right: '20px',
             width: '320px',
             height: '400px',
-            border: '1px solid #ccc',
+            border: '3px solid #000',
             borderRadius: '10px',
             backgroundColor: '#fff',
             display: 'flex',
@@ -92,6 +92,21 @@ const ChatBox: React.FC = () => {
             zIndex: 999,
           }}
         >
+          <div
+            style={{
+              backgroundColor: '#0070f3',
+              color: '#fff',
+              padding: '10px',
+              textAlign: 'center',
+              fontWeight: 'bold',
+              borderTopLeftRadius: '2px',
+              borderTopRightRadius: '2px',
+            }}
+          >
+            Abi bot
+ 
+          </div>
+
           <div style={{ flex: 1, overflowY: 'auto', padding: '10px' }}>
             {messages.map((msg, i) => (
               <div key={i} style={{ textAlign: msg.sender === 'user' ? 'right' : 'left' }}>
@@ -100,6 +115,7 @@ const ChatBox: React.FC = () => {
               </div>
             ))}
           </div>
+
           <div style={{ display: 'flex', borderTop: '1px solid #eee' }}>
             <input
               type="text"
@@ -120,4 +136,3 @@ const ChatBox: React.FC = () => {
 };
 
 export default ChatBox;
-

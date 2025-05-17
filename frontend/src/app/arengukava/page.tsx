@@ -1,8 +1,25 @@
 // src/app/arengukava/page.tsx
+'use client';
+
+import { useState } from 'react';
+
 export default function ArengukavaPage() {
+  const [searchQuery, setSearchQuery] = useState('');
+
   return (
     <>
       <h1 className="text-2xl font-bold mb-4">Arengukava 2035</h1>
+
+      {/* Search Bar */}
+      <div className="mb-6">
+        <input
+          type="text"
+          placeholder="Otsi arengukavast..."
+          className="w-full p-2 border border-gray-300 rounded-md"
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+        />
+      </div>
 
       {/* Intro */}
       <section className="mb-6">

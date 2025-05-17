@@ -85,8 +85,8 @@ export default function Home() {
         ></div>
         <div className="relative z-20 container mx-auto px-4 sm:px-6 md:px-8 lg:px-16 xl:px-24 h-full flex items-center">
           <div className="max-w-2xl text-white">
-            <h1 className="text-4xl md:text-6xl font-bold mb-6">
-              Kujundame Pärnu tulevikku koos
+            <h1 className="text-6xl md:text-8xl font-bold mb-6">
+              Räägi kaasa!
             </h1>
             <p className="text-xl md:text-2xl mb-10 leading-relaxed">
               Osale Pärnu linna arengus - jaga ideid, osale küsitlustel ja aita
