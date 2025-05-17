@@ -60,7 +60,7 @@ export default function Header() {
     <>
       {/* Main header */}
       <header
-        className={`fixed top-0 left-0 w-full h-20 flex z-50 transition-all`}
+        className={`fixed top-0 left-0 w-full h-20 flex justify-center z-50 transition-all`}
         style={{
           backgroundColor: isHomePage
             ? isMenuOpen
@@ -74,7 +74,7 @@ export default function Header() {
             : "none",
         }}
       >
-        <div className="container mx-auto px-4 sm:px-6 md:px-8 py-4 flex justify-between items-center">
+        <div className="w-screen px-4 sm:px-6 py-4 flex justify-between items-center">
           <div className="flex items-center">
             <Link href="/" className="flex items-center gap-4">
               <Image
