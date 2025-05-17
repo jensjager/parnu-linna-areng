@@ -4,6 +4,10 @@
 :root {
   --background: #ffffff;
   --foreground: #171717;
+
+  --gradient-start: #086cac;
+  --gradient-middle: #5f71d8;
+  --gradient-end: #086cac;
 }
 
 @theme inline {
@@ -21,7 +25,7 @@
 }
 
 @theme {
-  --color-primary: #1a78be;
+  --color-primary: #086cac;
   --color-white: #fff8f8;
 }
 
@@ -29,4 +33,22 @@ body {
   background: var(--background);
   color: var(--foreground);
   font-family: "Montserrat", sans-serif;
+}
+
+.bg-gradient {
+  background: radial-gradient(
+    ellipse at left,
+    var(--gradient-start) 0%,
+    var(--gradient-middle) 50%,
+    var(--gradient-end) 100%
+  );
+}
+
+.bg-gradient2 {
+  background: linear-gradient(
+    135deg,
+    var(--gradient-start),
+    var(--gradient-middle),
+    var(--gradient-end)
+  );
 }
