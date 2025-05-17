@@ -8,7 +8,8 @@ export default function Home() {
       id: 1,
       title: "Uus ideede konkurss kogukonna arendamiseks",
       date: "15. mai 2023",
-      image: "/images/uudis1.jpg",
+      image:
+        "https://visitparnu.com/wp-content/uploads/2023/01/top-20-parnu.jpg",
       excerpt:
         "Osale Pärnu linnaruumi parandamise ideede konkursil. Parimad ideed saavad rahastuse ja viime need ellu.",
       link: "/uudised/1",
@@ -17,7 +18,8 @@ export default function Home() {
       id: 2,
       title: "Rannaala uuenduste avalik arutelu",
       date: "12. mai 2023",
-      image: "/images/uudis2.jpg",
+      image:
+        "https://visitestonia.com/content-images/650005/parnu-en-001-visit-estonia.jpg",
       excerpt:
         "Tule ja ütle sõna sekka Pärnu rannaalal planeeritavate muutuste kohta. Avalik arutelu toimub 25. mail.",
       link: "/uudised/2",
@@ -26,7 +28,8 @@ export default function Home() {
       id: 3,
       title: "Suveürituste kava on avaldatud",
       date: "10. mai 2023",
-      image: "/images/uudis3.jpg",
+      image:
+        "https://frosthotel.ee/wp-content/uploads/2021/04/Ruutli-tanav-Parnu.jpg",
       excerpt:
         "Pärnu linna suvehooaja avalike ürituste kava on nüüd kättesaadav. Tutvu suviste sündmustega.",
       link: "/uudised/3",
@@ -155,8 +158,12 @@ export default function Home() {
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {uudised.map((uudis) => (
-              <Link href={uudis.link} key={uudis.id} className="group">
-                <div className="bg-white rounded-xl overflow-hidden shadow-sm h-full hover:shadow-md transition-shadow flex flex-col">
+              <Link
+                href={uudis.link}
+                key={uudis.id}
+                className="group hover:scale-102 transition-transform"
+              >
+                <div className="bg-gradient-to-br from-slate-100 via-gray-200 to-neutral-100 rounded-xl overflow-hidden shadow-sm h-full hover:shadow-md transition-shadow flex flex-col">
                   <div className="relative h-52">
                     <Image
                       src={uudis.image || "/images/placeholder.jpg"}
@@ -173,7 +180,7 @@ export default function Home() {
                     <p className="text-slate-600 mb-4 flex-grow">
                       {uudis.excerpt}
                     </p>
-                    <span className="text-[#1a78be] font-medium inline-flex items-center">
+                    <span className="text-primary font-medium inline-flex items-center">
                       Loe rohkem
                       <svg
                         width="20"
