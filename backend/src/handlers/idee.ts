@@ -18,7 +18,7 @@ export const ideeGetAll = async (req: Request, res: Response) => {
 export const ideePost = async (req: Request, res:Response) => {
     const payload = req.body;
     const { data, error } = await supabase
-        .from('Idee')
+        .from('idee')
         .insert([payload])   
         .single(); 
 

@@ -1,52 +1,91 @@
 "use client";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 
 type Poll = {
   id: string;
   question: string;
+  description: string;
   options: { id: string; text: string; votes: number }[];
 };
 
-const algPollid: Poll[] = [
-  {
-    id: "1",
-    question: "Millist uut parki sooviksid Pärnusse?",
-    options: [
-      { id: "a", text: "Laste mänguväljak", votes: 12 },
-      { id: "b", text: "Koerte park", votes: 8 },
-      { id: "c", text: "Spordipark", votes: 15 },
-    ],
-  },
-  {
-    id: "2",
-    question: "Kuidas parandada linna rattateid?",
-    options: [
-      { id: "a", text: "Rohkem rattateid", votes: 20 },
-      { id: "b", text: "Parem valgustus", votes: 10 },
-      { id: "c", text: "Rohkem rattahoidjaid", votes: 5 },
-    ],
-  },
-];
 
 export default function PollsPage() {
-  const [pollid, setPollid] = useState<Poll[]>(algPollid);
+  const [pollid, setPollid] = useState<Poll[]>([]);
   const [valitud, setValitud] = useState<{ [pollId: string]: string }>({});
 
+  useEffect(() => {
+    async function fetchPolls() {
+      try {
+        const response = await fetch("http://localhost:4000/api/idee");
+        const data = await response.json();
+  
+        const transformed: Poll[] = data.map((item: any) => ({
+          id: String(item.id),
+          question: item.pealkiri,
+          description: item.kirjeldus,
+          options: [
+            { id: "yes", text: "Poolt", votes: item.poolt },
+            { id: "no", text: "Vastu", votes: item.vastu },
+          ],
+        }));
+  
+        setPollid(transformed);
+      } catch (err) {
+        console.error("Vigane andmete laadimine:", err);
+      }
+    }
+  
+    fetchPolls();
+  }, []);
+
   const hääleta = (pollId: string, optionId: string) => {
-    if (valitud[pollId]) return; // juba hääletatud
+    setPollid((prev) =>
+      prev.map((poll) => {
+        if (poll.id !== pollId) return poll;
+
+        const oldSelection = valitud[pollId];
+
+        return {
+          ...poll,
+          options: poll.options.map((opt) => {
+            if (opt.id === optionId) {
+              return { ...opt, votes: opt.votes + 1 };
+            } else if (opt.id === oldSelection) {
+              return { ...opt, votes: Math.max(0, opt.votes - 1) };
+            }
+            return opt;
+          }),
+        };
+      })
+    );
+
+    setValitud((prev) => ({ ...prev, [pollId]: optionId }));
+  };
+
+  const eemaldaHääletus = (pollId: string) => {
+    const previousVote = valitud[pollId];
+    if (!previousVote) return;
+
     setPollid((prev) =>
       prev.map((poll) =>
         poll.id === pollId
           ? {
               ...poll,
               options: poll.options.map((opt) =>
-                opt.id === optionId ? { ...opt, votes: opt.votes + 1 } : opt
+                opt.id === previousVote
+                  ? { ...opt, votes: Math.max(0, opt.votes - 1) }
+                  : opt
               ),
             }
           : poll
       )
     );
-    setValitud((prev) => ({ ...prev, [pollId]: optionId }));
+
+    setValitud((prev) => {
+      const updated = { ...prev };
+      delete updated[pollId];
+      return updated;
+    });
   };
 
   return (
@@ -54,30 +93,49 @@ export default function PollsPage() {
       <h1 className="text-3xl font-bold mb-6">Kogukonna küsitlused</h1>
       {pollid.map((poll) => (
         <div key={poll.id} className="mb-8 p-6 bg-white rounded shadow">
-          <h2 className="text-xl font-semibold mb-4">{poll.question}</h2>
+          <h2 className="text-xl font-semibold mb-2">{poll.question}</h2>
+          <p className="text-gray-600 mb-4">{poll.description}</p>
           <ul>
-            {poll.options.map((opt) => (
-              <li key={opt.id} className="mb-2 flex items-center">
-                <button
-                  className={`mr-3 px-4 py-2 rounded ${
-                    valitud[poll.id]
-                      ? valitud[poll.id] === opt.id
-                        ? "bg-green-500 text-white"
-                        : "bg-gray-200 text-gray-500"
-                      : "bg-blue-500 text-white hover:bg-blue-600"
-                  }`}
-                  disabled={!!valitud[poll.id]}
-                  onClick={() => hääleta(poll.id, opt.id)}
-                >
-                  {opt.text}
-                </button>
-                <span className="text-gray-700">{opt.votes} häält</span>
-              </li>
-            ))}
+            {poll.options.map((opt) => {
+              const isSelected = valitud[poll.id] === opt.id;
+              return (
+                <li key={opt.id} className="mb-2 flex items-center">
+                  <button
+                    className={`mr-3 px-4 py-2 rounded font-medium
+                      ${
+                        opt.id === "yes"
+                          ? isSelected
+                            ? "bg-green-600 text-white"
+                            : "bg-green-100 text-green-700 hover:bg-green-200"
+                          : opt.id === "no"
+                          ? isSelected
+                            ? "bg-red-600 text-white"
+                            : "bg-red-100 text-red-700 hover:bg-red-200"
+                          : ""
+                      }
+                    `}
+                    onClick={() => hääleta(poll.id, opt.id)}
+                  >
+                    {opt.text}
+                  </button>
+                  <span className="text-gray-700">{opt.votes} häält</span>
+                </li>
+              );
+            })}
           </ul>
+
           {valitud[poll.id] && (
             <div className="mt-2 text-green-700 font-medium">
-              Aitäh hääletamast!
+              Hääletus salvestatud:{" "}
+              {
+                poll.options.find((o) => o.id === valitud[poll.id])?.text
+              }
+              <button
+                className="block mt-1 text-sm text-red-600 underline hover:text-red-800"
+                onClick={() => eemaldaHääletus(poll.id)}
+              >
+                Eemalda hääletus
+              </button>
             </div>
           )}
         </div>
