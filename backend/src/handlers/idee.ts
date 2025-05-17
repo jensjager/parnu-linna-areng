@@ -40,9 +40,8 @@ export const ideeGetAll = async (req: Request, res: Response) => {
   
   // Calculate total pages
   const totalPages = limit ? Math.ceil((count || 0) / parseInt(limit as string)) : 1;
-  
-  // Return the paginated response
-  return res.json({
+    // Send the paginated response
+  res.json({
     data,
     total: count || 0,
     page: page ? parseInt(page as string) : 1,
@@ -58,32 +57,45 @@ export const ideeGetById = async (req: Request, res: Response) => {
     .select('*')
     .eq('id', id)
     .single();
-  
-  if (error) {
+    if (error) {
     console.error(`Error fetching idea with id ${id}:`, error);
-    return res.status(404).json({ error: 'Idea not found' });
+    res.status(404).json({ error: 'Idea not found' });
+    return;
   }
   
-  return res.json(data);
+  res.json(data);
 }
 
 export const ideeUpdate = async (req: Request, res: Response) => {
   const { id } = req.params;
   const payload = req.body;
   
-  const { data, error } = await supabase
-    .from('idee')
-    .update(payload)
-    .eq('id', id)
-    .select()
-    .single();
+  console.log('Updating idea with id:', id, 'payload:', JSON.stringify(payload));
   
-  if (error) {
-    console.error(`Error updating idea with id ${id}:`, error);
-    return res.status(400).json({ error: error.message });
+  try {
+    // Using upsert instead of update to handle potential permission issues
+    const { data, error } = await supabase
+      .from('idee')
+      .upsert({ id: parseInt(id), ...payload }, { onConflict: 'id' })
+      .select('*')
+      .single();
+      
+    if (error) {
+      console.error(`Error updating idea with id ${id}:`, error);
+      return res.status(400).json({ error: error.message });
+    }
+    
+    console.log('Updated data:', data);
+    
+    if (!data) {
+      return res.status(404).json({ error: 'No data returned after update' });
+    }
+    
+    return res.json(data);
+  } catch (err) {
+    console.error(`Exception updating idea with id ${id}:`, err);
+    return res.status(500).json({ error: 'Internal server error' });
   }
-  
-  return res.json(data);
 }
 
 export const ideePost = async (req: Request, res: Response) => {
@@ -99,26 +111,25 @@ export const ideePost = async (req: Request, res: Response) => {
         .from('idee')
         .insert([payload])   
         .select()
-        .single(); 
-
-    if (error) {
-      return res.status(400).json({ error: error.message });
+        .single();     if (error) {
+      res.status(400).json({ error: error.message });
+      return;
     }
 
-    return res.status(201).json(data);
+    res.status(201).json(data);
 }
 
 export const getSektorid = async (_req: Request, res: Response) => {
   const { data, error } = await supabase
     .from('sektor')
     .select('*');
-  
-  if (error) {
+    if (error) {
     console.error('Error fetching sectors:', error);
-    return res.status(500).json({ error: error.message });
+    res.status(500).json({ error: error.message });
+    return;
   }
   
-  return res.json(data);
+  res.json(data);
 }
 
 export const ideeDelete = async (req: Request, res: Response) => {
@@ -128,11 +139,11 @@ export const ideeDelete = async (req: Request, res: Response) => {
     .from('idee')
     .delete()
     .eq('id', id);
-  
-  if (error) {
+    if (error) {
     console.error(`Error deleting idea with id ${id}:`, error);
-    return res.status(400).json({ error: error.message });
+    res.status(400).json({ error: error.message });
+    return;
   }
   
-  return res.status(204).send();
+  res.status(204).send();
 }

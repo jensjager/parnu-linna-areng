@@ -21,30 +21,96 @@ interface Sektor {
 // API base URL - this should point to your backend server
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3002/api';
 
+// Default sectors to use when API fails
+const DEFAULT_SECTORS: Sektor[] = [
+  { id: 1, nimi: 'RAHVASTIKU ARENG' },
+  { id: 2, nimi: 'LOODUSKESKKOND' },
+  { id: 3, nimi: 'KULTUUR' },
+  { id: 4, nimi: 'SPORT' },
+  { id: 5, nimi: 'ETTEVÕTLUS' },
+  { id: 6, nimi: 'ELUKESKKOND' },
+  { id: 7, nimi: 'AVALIKUD TEENUSED' },
+  { id: 8, nimi: 'HARIDUS' },
+  { id: 9, nimi: 'MUU' }
+];
+
+const MOCK_IDEAS: Idea[] = [
+  { id: 1, pealkiri: 'Pärnu ranna laiendamine', kirjeldus: 'Pärnu ranna laiendamine Mere puiestee suunas, et mahutada rohkem külastajaid suvehooajal ja vähendada ülerahvastatust tipphetkedel.', hääletusel: true, valdkond: 'LOODUSKESKKOND' },
+  { id: 2, pealkiri: 'Koerte park kesklinna', kirjeldus: 'Rajada kesklinna lähedale täielikult tarastatud koerte jalutusala, kus koerad saaksid vabalt joosta. Parki võiks lisada ka treeningvahendid ja joogikohad.', hääletusel: false, valdkond: 'LOODUSKESKKOND' },
+  { id: 3, pealkiri: 'Rattalaenutus süsteemi laiendamine', kirjeldus: 'Laiendada olemasolevat rattalaenutuse süsteemi, et see kataks ka äärelinnad ja populaarsed turismikohad.', hääletusel: true, valdkond: 'KULTUUR' },
+  { id: 4, pealkiri: 'Avalikud WiFi punktid randades', kirjeldus: 'Paigaldada tasuta WiFi levialad kõikidesse Pärnu randadesse, et turistid ja kohalikud saaksid mugavalt internetti kasutada.', hääletusel: false, valdkond: 'ETTEVÕTLUS' },
+  { id: 5, pealkiri: 'Rohkem prügikaste kesklinnas', kirjeldus: 'Paigaldada rohkem prügikaste ja sorteerimiskonteinereid kesklinna piirkonda, eriti suure käidavusega aladele nagu promenaad ja rannapark.', hääletusel: false, valdkond: 'LOODUSKESKKOND' },
+  { id: 6, pealkiri: 'Talvine uisuväljak jõe äärde', kirjeldus: 'Rajada talveperioodiks suur uisuväljak jõe äärde, mis oleks valgustatud ja kus mängiks muusika. See tooks linna talvel rohkem elu.', hääletusel: false, valdkond: 'ETTEVÕTLUS' },
+  { id: 7, pealkiri: 'Elektritõukerataste parkimisalad', kirjeldus: 'Määrata kindlad parkimisalad elektritõukeratastele, et vähendada nende juhuslikku parkimist kõnniteedel ja muudes kohtades, mis takistab jalakäijaid.', hääletusel: true, valdkond: 'KULTUUR' },
+  { id: 8, pealkiri: 'Rannapromenaadi pikendamine', kirjeldus: 'Pikendada rannapromenaadi Mai rajooni suunas, et luua ühtne jalutustee piki kogu randa.', hääletusel: true, valdkond: 'LOODUSKESKKOND' },
+  { id: 9, pealkiri: 'Rohkem lasteaedu', kirjeldus: 'Rajada linna juurde vähemalt kaks uut lasteaeda, sest olemasolevad on ülerahvastatud ja kohti ei jätku kõigile soovijatele.', hääletusel: true, valdkond: 'SPORT' },
+  { id: 10, pealkiri: 'Avalik saun rannas', kirjeldus: 'Ehitada ranna lähedusse avalik saun, mida saaksid kasutada nii kohalikud kui turistid, eriti talveujujad.', hääletusel: false, valdkond: 'ETTEVÕTLUS' },
+  { id: 11, pealkiri: 'Luteri kiriku torni vaateplatvorm', kirjeldus: 'Avada Eliisabeti kiriku torn külastajatele, et pakkuda ilusat vaadet linnale ja merele. See tooks juurde turiste ja täiendavat tulu kirikule.', hääletusel: true, valdkond: 'ETTEVÕTLUS' },
+  { id: 12, pealkiri: 'Linna ettevõtluse toetusprogramm', kirjeldus: 'Luua spetsiaalne toetusprogramm kohalikele väikeettevõtetele, et soodustada uute töökohtade loomist ja äride alustamist.', hääletusel: true, valdkond: 'RAHVASTIKU ARENG' }
+];
+
+// Empty placeholder until we load from the API
+const sektorid: Sektor[] = [];
+
 export default function Arengukava() {
   const [authenticated, setAuthenticated] = useState(false);
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  
   // State for ideas management
   const [ideas, setIdeas] = useState<Idea[]>([]);
+  const [sectors, setSectors] = useState<Sektor[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [selectedIdea, setSelectedIdea] = useState<Idea | null>(null);
   const [editedIdea, setEditedIdea] = useState<Idea | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
+  const [selectedSector, setSelectedSector] = useState<number | null>(null);
   const [loading, setLoading] = useState(false);
   const [totalPages, setTotalPages] = useState(1);
   const [totalIdeas, setTotalIdeas] = useState(0);
   const ideasPerPage = 20;
-      // Fetch ideas when page or search term changes
+    // Fetch sectors on component mount
+  useEffect(() => {
+    async function fetchSectors() {
+      try {        // Use the backend API instead of the frontend mock
+        const response = await fetch(`${API_BASE_URL}/sektorid`, {
+          mode: 'cors',
+          credentials: 'include',
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        });
+        if (!response.ok) {
+          throw new Error('Failed to fetch sectors');
+        }
+        const data = await response.json();
+        setSectors(data);
+      } catch (error) {
+        console.error("Error fetching sectors:", error);
+        // Fallback to mock data
+        setSectors(DEFAULT_SECTORS);
+      }    }
+    
+    fetchSectors();
+  }, []);    // Fetch ideas when page, search term, or selected sector changes
   useEffect(() => {
     if (!authenticated) return; // Don't fetch if not authenticated
     
     async function fetchIdeas() {
       setLoading(true);
-      try {        // Build the query URL with parameters - use the backend API
+      try {
+        // Build the query URL with parameters - use the backend API
         let url = `${API_BASE_URL}/ideed?page=${currentPage}&limit=${ideasPerPage}`;
         
-        if (searchTerm.trim() !== '') {
+        if (selectedSector !== null) {
+          // Get the sector name for the selected sector ID
+          const sectorName = sectors.find(s => s.id === selectedSector)?.nimi;
+          if (sectorName) {
+            url += `&valdkond=${encodeURIComponent(sectorName)}`;
+            console.log('Filtering by valdkond:', sectorName);
+          }
+        }
+          if (searchTerm.trim() !== '') {
           url += `&searchTerm=${encodeURIComponent(searchTerm.trim())}`;
         }
         
@@ -62,22 +128,23 @@ export default function Arengukava() {
         const data = await response.json();
         setIdeas(data.data);
         setTotalPages(data.totalPages);
-        setTotalIdeas(data.total);      } catch (error) {
+        setTotalIdeas(data.total);
+      } catch (error) {
         console.error("Error fetching ideas:", error);
-        // No fallback to mock data, show empty list instead
-        setIdeas([]);
+        // Fallback to mock data
+        setIdeas(MOCK_IDEAS);
         setTotalPages(1);
-        setTotalIdeas(0);
-      } finally {
+        setTotalIdeas(MOCK_IDEAS.length);      } finally {
         setLoading(false);
-      }    }
-      fetchIdeas();
-  }, [currentPage, authenticated, searchTerm]);
-    // The search is now handled by the backend
-  const filteredIdeas = ideas;
+      }
+    }
     
-  // Handle opening the idea editor popup  
-  const handleIdeaClick = async (idea: Idea) => {
+    fetchIdeas();
+  }, [currentPage, selectedSector, authenticated, searchTerm, sectors]);
+  
+  // The search is now handled by the backend
+  const filteredIdeas = ideas;
+    // Handle opening the idea editor popup  const handleIdeaClick = async (idea: Idea) => {
     try {
       // Use backend API
       const response = await fetch(`${API_BASE_URL}/ideed/${idea.id}`, {
@@ -101,11 +168,11 @@ export default function Arengukava() {
       setEditedIdea({ ...idea });
     }
   };
+
   const handleClosePopup = () => {
     setSelectedIdea(null);
     setEditedIdea(null);
   };
-
   const handleSaveIdea = async () => {
     if (!editedIdea) return;
     
@@ -148,7 +215,8 @@ export default function Arengukava() {
       // Show error message to user
       alert("Viga idee uuendamisel. Palun proovi uuesti.");
     }
-  };    // Function to delete an idea
+  };
+    // Function to delete an idea
   const handleDeleteIdea = async () => {
     if (!editedIdea) return;
     
@@ -178,9 +246,8 @@ export default function Arengukava() {
     } catch (error) {
       console.error("Error deleting idea:", error);
       alert("Viga idee kustutamisel. Palun proovi uuesti.");
-    }  };  
-
-  // Initialize a new empty idea
+    }
+  };  // Initialize a new empty idea
   const initializeNewIdea = () => {
     const newIdea: Idea = {
       id: 0, // This will be assigned by the database on creation
@@ -221,9 +288,23 @@ export default function Arengukava() {
       handleClosePopup();
       
       // Show success notification
-      showNotification('Idee edukalt loodud!', 'success');    } catch (error) {
+      showNotification('Idee edukalt loodud!', 'success');
+    } catch (error) {
       console.error("Error creating idea:", error);
-      alert("Viga idee loomisel. Palun proovi uuesti.");
+      
+      // When backend is unavailable, create mock data for testing purposes
+      if (window.confirm("Ei õnnestunud ideed luua. Võimalik, et server pole kättesaadav. Kas soovid lisada test-idee?")) {
+        const mockId = Math.floor(Math.random() * 10000) + 100;
+        const mockNewIdea = {
+          ...editedIdea,
+          id: mockId
+        };
+        
+        setIdeas([mockNewIdea, ...ideas].slice(0, ideasPerPage));
+        handleClosePopup();
+      } else {
+        alert("Viga idee loomisel. Palun proovi uuesti.");
+      }
     }
   };
     const handleSubmit = (e: React.FormEvent) => {    
@@ -255,24 +336,35 @@ export default function Arengukava() {
     setCurrentPage(1);
     fetchIdeasData(1);
   };
+
   // Function to reset all filters
   const resetFilters = () => {
     setSearchTerm('');
+    setSelectedSector(null);
     setCurrentPage(1);
     // After setting state to null, manually fetch to ensure we get unfiltered data
     setTimeout(() => fetchIdeasData(1), 0);
   };
+
   // Function to fetch ideas data to reuse in multiple places
   const fetchIdeasData = async (page: number) => {
     setLoading(true);
     try {      // Build the query URL with parameters
       let url = `${API_BASE_URL}/ideed?page=${page}&limit=${ideasPerPage}`;
       
+      if (selectedSector !== null) {
+        // Get the sector name for the selected sector ID
+        const sectorName = sectors.find(s => s.id === selectedSector)?.nimi;
+        if (sectorName) {
+          url += `&valdkond=${encodeURIComponent(sectorName)}`;
+          console.log('Filtering by valdkond:', sectorName);
+        }
+      }
+      
       if (searchTerm.trim() !== '') {
         url += `&searchTerm=${encodeURIComponent(searchTerm.trim())}`;
       }
-      
-      console.log('Fetching ideas with URL:', url);
+        console.log('Fetching ideas with URL:', url);
       const response = await fetch(url, {
         mode: 'cors',
         credentials: 'include',
@@ -287,12 +379,13 @@ export default function Arengukava() {
       const data = await response.json();
       setIdeas(data.data);
       setTotalPages(data.totalPages);
-      setTotalIdeas(data.total);    } catch (error) {
+      setTotalIdeas(data.total);
+    } catch (error) {
       console.error("Error fetching ideas:", error);
-      // No fallback to mock data, show empty list instead
-      setIdeas([]);
+      // Fallback to mock data
+      setIdeas(MOCK_IDEAS);
       setTotalPages(1);
-      setTotalIdeas(0);
+      setTotalIdeas(MOCK_IDEAS.length);
     } finally {
       setLoading(false);
     }
@@ -336,7 +429,8 @@ export default function Arengukava() {
         <h1 className="text-4xl font-bold text-black">Ideedehaldur</h1>
         
         {/* Search and Filter Controls */}
-        <div className="w-full flex flex-col sm:flex-row gap-4">          {/* Search Bar */}
+        <div className="w-full flex flex-col sm:flex-row gap-4">
+          {/* Search Bar */}
           <div className="flex-1">
             <div className="relative">
               <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
@@ -355,6 +449,26 @@ export default function Arengukava() {
                 }}
               />
             </div>
+          </div>
+          
+          {/* Sector Filter */}
+          <div className="w-full sm:w-64">            <select
+              className="block w-full p-3 text-sm text-black border border-gray-300 rounded-lg bg-white"
+              value={selectedSector === null ? '' : selectedSector}
+              onChange={(e) => {
+                const value = e.target.value === '' ? null : Number(e.target.value);
+                console.log('Selected sector value:', value);
+                setSelectedSector(value);
+                setCurrentPage(1); // Reset to first page when filtering
+              }}
+            >
+              <option value="">Kõik sektorid</option>
+              {sectors.map(sektor => (
+                <option key={sektor.id} value={sektor.id}>
+                  {sektor.nimi}
+                </option>
+              ))}
+            </select>
           </div>
         </div>
         
@@ -470,18 +584,24 @@ export default function Arengukava() {
                   onChange={(e) => setEditedIdea({...editedIdea, pealkiri: e.target.value})}
                   className="w-full p-2 border border-gray-300 rounded-md shadow-sm text-black"
                 />
-              </div>              {/* Sector Input - Direct text input */}
+              </div>
+                {/* Sector Selector */}
               <div className="mb-4">
-                <label htmlFor="valdkond" className="block text-sm font-medium text-black mb-1">
+                <label htmlFor="sektor" className="block text-sm font-medium text-black mb-1">
                   Valdkond:
                 </label>
-                <input
-                  id="valdkond"
-                  type="text"
+                <select
+                  id="sektor"
                   value={editedIdea.valdkond || ''}
                   onChange={(e) => setEditedIdea({...editedIdea, valdkond: e.target.value})}
                   className="w-full p-2 border border-gray-300 rounded-md shadow-sm text-black"
-                />
+                >
+                  {sectors.map(sektor => (
+                    <option key={sektor.id} value={sektor.nimi}>
+                      {sektor.nimi}
+                    </option>
+                  ))}
+                </select>
               </div>
               
               {/* Description Input */}

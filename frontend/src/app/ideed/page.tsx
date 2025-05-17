@@ -42,11 +42,9 @@ export default function IdeedPage() {
   };  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSubmitting(true);
-    setError("");
-
-    try {
+    setError("");    try {
       // First try the real backend API
-      const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000/api';
+      const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3002/api';
       const response = await fetch(`${API_BASE_URL}/ideed`, {
         method: "POST",
         headers: {

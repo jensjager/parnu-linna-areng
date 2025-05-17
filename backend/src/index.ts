@@ -3,7 +3,7 @@ import router from './routes/routes';
 import cors from 'cors';
 
 const app = express();
-const port = 3000;
+const port = 3002; // Changed from 3000 to avoid conflict with frontend
 
 // Enable CORS for frontend requests
 app.use(cors({
