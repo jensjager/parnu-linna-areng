@@ -19,6 +19,7 @@ export default function IdeedPage() {
   });
   const [saadetud, setSaadetud] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [submitting, setSubmitting] = useState(false);
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
@@ -29,6 +30,7 @@ export default function IdeedPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
+    setSubmitting(true);
 
     try {
       const res = await fetch("http://localhost:4000/api/ideepost", {
@@ -47,6 +49,8 @@ export default function IdeedPage() {
     } catch (err: any) {
       console.error("Saatmisel tekkis viga:", err);
       setError(err.message || "Saatmine ebaõnnestus");
+    } finally {
+      setSubmitting(false);
     }
   };
   return (

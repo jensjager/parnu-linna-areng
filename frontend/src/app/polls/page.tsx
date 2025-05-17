@@ -8,24 +8,33 @@ type Poll = {
   options: { id: string; text: string; votes: number }[];
 };
 
-
 export default function PollsPage() {
   const [pollid, setPollid] = useState<Poll[]>([]);
-  const [valitud, setValitud] = useState<{ [pollId: string]: string }>({});
-
-  useEffect(() => {
+  const [valitud, setValitud] = useState<{ [pollId: string]: string }>({});  useEffect(() => {
     async function fetchPolls() {
       try {
-        const response = await fetch("http://localhost:4000/api/idee");
-        const data = await response.json();
+        // Add cache-busting parameter to prevent browser caching
+        const response = await fetch("http://localhost:3000/api/ideed?t=" + new Date().getTime());
+        if (!response.ok) {
+          throw new Error('Failed to fetch polls');
+        }
+        const responseData = await response.json();
+        
+        // Check the structure of the response
+        const dataArray = responseData.data || responseData || [];
+        
+        if (!Array.isArray(dataArray)) {
+          console.error("Expected array of polls, got:", responseData);
+          return;
+        }
   
-        const transformed: Poll[] = data.map((item: any) => ({
+        const transformed: Poll[] = dataArray.map((item: any) => ({
           id: String(item.id),
-          question: item.pealkiri,
-          description: item.kirjeldus,
+          question: item.pealkiri || "",
+          description: item.kirjeldus || "",
           options: [
-            { id: "yes", text: "Poolt", votes: item.poolt },
-            { id: "no", text: "Vastu", votes: item.vastu },
+            { id: "yes", text: "Poolt", votes: item.poolt || 0 },
+            { id: "no", text: "Vastu", votes: item.vastu || 0 },
           ],
         }));
   
@@ -36,14 +45,18 @@ export default function PollsPage() {
     }
   
     fetchPolls();
-  }, []);
+  }, []);  const hääleta = async (pollId: string, optionId: string) => {
+    // Find the current poll
+    const currentPoll = pollid.find(p => p.id === pollId);
+    if (!currentPoll) return;
 
-  const hääleta = (pollId: string, optionId: string) => {
+    // Get previous selection if any
+    const oldSelection = valitud[pollId];
+
+    // Update UI optimistically
     setPollid((prev) =>
       prev.map((poll) => {
         if (poll.id !== pollId) return poll;
-
-        const oldSelection = valitud[pollId];
 
         return {
           ...poll,
@@ -59,13 +72,47 @@ export default function PollsPage() {
       })
     );
 
+    // Update state of selections
     setValitud((prev) => ({ ...prev, [pollId]: optionId }));
+    
+    // Calculate new vote counts
+    let pooltVotes = 0;
+    let vastuVotes = 0;
+    
+    if (optionId === 'yes') {
+      pooltVotes = 1;
+      if (oldSelection === 'no') {
+        vastuVotes = -1;
+      }
+    } else if (optionId === 'no') {
+      vastuVotes = 1;
+      if (oldSelection === 'yes') {
+        pooltVotes = -1;
+      }
+    }
+    
+    // Send vote to backend
+    try {
+      await fetch(`http://localhost:4000/api/ideed/${pollId}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          poolt: pooltVotes,
+          vastu: vastuVotes
+        }),
+      });
+    } catch (error) {
+      console.error("Error updating vote:", error);
+    }
   };
 
-  const eemaldaHääletus = (pollId: string) => {
+  const eemaldaHääletus = async (pollId: string) => {
     const previousVote = valitud[pollId];
     if (!previousVote) return;
 
+    // Update UI optimistically
     setPollid((prev) =>
       prev.map((poll) =>
         poll.id === pollId
@@ -81,11 +128,27 @@ export default function PollsPage() {
       )
     );
 
+    // Update state of selections
     setValitud((prev) => {
       const updated = { ...prev };
       delete updated[pollId];
       return updated;
     });
+
+    // Send vote removal to backend
+    try {
+      await fetch(`http://localhost:4000/api/ideed/${pollId}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          [previousVote === 'yes' ? 'poolt' : 'vastu']: -1
+        }),
+      });
+    } catch (error) {
+      console.error("Error removing vote:", error);
+    }
   };
 
   return (

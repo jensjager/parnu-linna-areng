@@ -1,6 +1,19 @@
 import { Request, Response } from 'express';
 import { supabase } from '../config/supabase';
 
+// Define the Idee interface
+interface Idee {
+  id?: number;
+  pealkiri: string;
+  kirjeldus: string;
+  nimi?: string;
+  email?: string;
+  sektorId?: number;
+  valdkond?: string;
+  hääletusel?: boolean;
+  loodud?: Date;
+}
+
 export const ideeGetAll = async (req: Request, res: Response) => {
   const { page, limit, sektorId, hääletusel, searchTerm } = req.query;
   
@@ -32,85 +45,15 @@ export const ideeGetAll = async (req: Request, res: Response) => {
   
   // Execute the query
   const { data, error, count } = await query;
-
   if (error) {
-    console.error('Error fetching ideas:', error);
-    return res.status(500).json({ error: error.message });
-  }
-
-  res.send(Idee)
-}
-
-export const ideePost = async (req: Request, res:Response) => {
-    const payload = req.body;
-    const { data, error } = await supabase
-        .from('idee')
-        .insert([payload])   
-        .single(); 
-
-        if (error) {
-          res.status(400).json({ error: error.message });
-        }
-        
-  
-  // Calculate total pages
-  const totalPages = limit ? Math.ceil((count || 0) / parseInt(limit as string)) : 1;
-    // Send the paginated response
-  res.json({
-    data,
-    total: count || 0,
-    page: page ? parseInt(page as string) : 1,
-    totalPages
-  });
-}
-
-export const ideeGetById = async (req: Request, res: Response) => {
-  const { id } = req.params;
-  
-  const { data, error } = await supabase
-    .from('idee')
-    .select('*')
-    .eq('id', id)
-    .single();
-    if (error) {
-    console.error(`Error fetching idea with id ${id}:`, error);
-    res.status(404).json({ error: 'Idea not found' });
+    console.error('Error fetching users:', error)
+    res.status(500).json({ error: error.message });
     return;
+  } else {
+    console.log('All users:', data)
   }
-  
-  res.json(data);
-}
 
-export const ideeUpdate = async (req: Request, res: Response) => {
-  const { id } = req.params;
-  const payload = req.body;
-  
-  console.log('Updating idea with id:', id, 'payload:', JSON.stringify(payload));
-  
-  try {
-    // Using upsert instead of update to handle potential permission issues
-    const { data, error } = await supabase
-      .from('idee')
-      .upsert({ id: parseInt(id), ...payload }, { onConflict: 'id' })
-      .select('*')
-      .single();
-      
-    if (error) {
-      console.error(`Error updating idea with id ${id}:`, error);
-      return res.status(400).json({ error: error.message });
-    }
-    
-    console.log('Updated data:', data);
-    
-    if (!data) {
-      return res.status(404).json({ error: 'No data returned after update' });
-    }
-    
-    return res.json(data);
-  } catch (err) {
-    console.error(`Exception updating idea with id ${id}:`, err);
-    return res.status(500).json({ error: 'Internal server error' });
-  }
+  res.json({ data, count })
 }
 
 export const ideePost = async (req: Request, res: Response) => {
@@ -125,13 +68,13 @@ export const ideePost = async (req: Request, res: Response) => {
     const { data, error } = await supabase
         .from('idee')
         .insert([payload])   
-        .select()
-        .single();     if (error) {
-      res.status(400).json({ error: error.message });
-      return;
-    }
+        .single(); 
 
-    res.status(201).json(data);
+        if (error) {
+          res.status(400).json({ error: error.message });
+        }
+  
+        res.status(201).json(data);
 }
 
 export const getSektorid = async (_req: Request, res: Response) => {
@@ -161,4 +104,41 @@ export const ideeDelete = async (req: Request, res: Response) => {
   }
   
   res.status(204).send();
+}
+
+export const ideeGetById = async (req: Request, res: Response) => {
+  const { id } = req.params;
+  
+  const { data, error } = await supabase
+    .from('idee')
+    .select('*')
+    .eq('id', id)
+    .single();
+    
+  if (error) {
+    console.error(`Error fetching idea with id ${id}:`, error);
+    res.status(400).json({ error: error.message });
+    return;
+  }
+  
+  res.json(data);
+}
+
+export const ideeUpdate = async (req: Request, res: Response) => {
+  const { id } = req.params;
+  const updates = req.body;
+  
+  const { data, error } = await supabase
+    .from('idee')
+    .update(updates)
+    .eq('id', id)
+    .select();
+    
+  if (error) {
+    console.error(`Error updating idea with id ${id}:`, error);
+    res.status(400).json({ error: error.message });
+    return;
+  }
+  
+  res.json(data);
 }
