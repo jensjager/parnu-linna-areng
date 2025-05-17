@@ -5,45 +5,73 @@ type Poll = {
   id: string;
   question: string;
   description: string;
+  hääletusel?: boolean;
   options: { id: string; text: string; votes: number }[];
 };
-
 
 export default function PollsPage() {
   const [pollid, setPollid] = useState<Poll[]>([]);
   const [valitud, setValitud] = useState<{ [pollId: string]: string }>({});
-
+  
+  // Load saved votes from localStorage on component mount
+  useEffect(() => {
+    // Check if we're in the browser environment
+    if (typeof window !== 'undefined') {
+      const savedVotes = localStorage.getItem('pollVotes');
+      if (savedVotes) {
+        setValitud(JSON.parse(savedVotes));
+      }
+    }
+  }, []);
+  
   useEffect(() => {
     async function fetchPolls() {
       try {
-        const response = await fetch("http://localhost:4000/api/idee");
-        const data = await response.json();
-  
-        const transformed: Poll[] = data.map((item: any) => ({
+        // Add cache-busting parameter to prevent browser caching
+        const response = await fetch("http://localhost:3000/api/ideed?t=" + new Date().getTime());
+        if (!response.ok) {
+          throw new Error('Failed to fetch polls');
+        }
+        const responseData = await response.json();
+        
+        // Check the structure of the response
+        const dataArray = responseData.data || responseData || [];
+        
+        if (!Array.isArray(dataArray)) {
+          console.error("Expected array of polls, got:", responseData);
+          return;
+        }        const transformed: Poll[] = dataArray.map((item: any) => ({
           id: String(item.id),
-          question: item.pealkiri,
-          description: item.kirjeldus,
+          question: item.pealkiri || "",
+          description: item.kirjeldus || "",
+          hääletusel: item.hääletusel || false,
           options: [
-            { id: "yes", text: "Poolt", votes: item.poolt },
-            { id: "no", text: "Vastu", votes: item.vastu },
+            { id: "yes", text: "Poolt", votes: item.poolt || 0 },
+            { id: "no", text: "Vastu", votes: item.vastu || 0 },
           ],
         }));
   
-        setPollid(transformed);
+        // Filter polls to only show those with hääletusel set to true
+        const filteredPolls = transformed.filter(poll => poll.hääletusel === true);
+        setPollid(filteredPolls);
       } catch (err) {
         console.error("Vigane andmete laadimine:", err);
       }
     }
   
     fetchPolls();
-  }, []);
+  }, []);  const hääleta = async (pollId: string, optionId: string) => {
+    // Find the current poll
+    const currentPoll = pollid.find(p => p.id === pollId);
+    if (!currentPoll) return;
 
-  const hääleta = (pollId: string, optionId: string) => {
+    // Get previous selection if any
+    const oldSelection = valitud[pollId];
+
+    // Update UI optimistically
     setPollid((prev) =>
       prev.map((poll) => {
         if (poll.id !== pollId) return poll;
-
-        const oldSelection = valitud[pollId];
 
         return {
           ...poll,
@@ -57,15 +85,53 @@ export default function PollsPage() {
           }),
         };
       })
-    );
-
-    setValitud((prev) => ({ ...prev, [pollId]: optionId }));
+    );    // Update state of selections
+    const updatedVotes = { ...valitud, [pollId]: optionId };
+    setValitud(updatedVotes);
+    
+    // Save to localStorage
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('pollVotes', JSON.stringify(updatedVotes));
+    }
+    
+    // Calculate new vote counts
+    let pooltVotes = 0;
+    let vastuVotes = 0;
+    
+    if (optionId === 'yes') {
+      pooltVotes = 1;
+      if (oldSelection === 'no') {
+        vastuVotes = -1;
+      }
+    } else if (optionId === 'no') {
+      vastuVotes = 1;
+      if (oldSelection === 'yes') {
+        pooltVotes = -1;
+      }
+    }
+    
+    // Send vote to backend
+    try {
+      await fetch(`http://localhost:4000/api/ideed/${pollId}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          poolt: pooltVotes,
+          vastu: vastuVotes
+        }),
+      });
+    } catch (error) {
+      console.error("Error updating vote:", error);
+    }
   };
 
-  const eemaldaHääletus = (pollId: string) => {
+  const eemaldaHääletus = async (pollId: string) => {
     const previousVote = valitud[pollId];
     if (!previousVote) return;
 
+    // Update UI optimistically
     setPollid((prev) =>
       prev.map((poll) =>
         poll.id === pollId
@@ -79,23 +145,44 @@ export default function PollsPage() {
             }
           : poll
       )
-    );
+    );    // Update state of selections
+    const updatedVotes = { ...valitud };
+    delete updatedVotes[pollId];
+    setValitud(updatedVotes);
+    
+    // Update localStorage
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('pollVotes', JSON.stringify(updatedVotes));
+    }
 
-    setValitud((prev) => {
-      const updated = { ...prev };
-      delete updated[pollId];
-      return updated;
-    });
-  };
-
-  return (
+    // Send vote removal to backend
+    try {
+      await fetch(`http://localhost:4000/api/ideed/${pollId}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          [previousVote === 'yes' ? 'poolt' : 'vastu']: -1
+        }),
+      });
+    } catch (error) {
+      console.error("Error removing vote:", error);
+    }
+  };  return (
     <main className="max-w-2xl mx-auto py-8 px-4">
       <h1 className="text-3xl font-bold mb-6">Kogukonna küsitlused</h1>
-      {pollid.map((poll) => (
-        <div key={poll.id} className="mb-8 p-6 bg-white rounded shadow">
-          <h2 className="text-xl font-semibold mb-2">{poll.question}</h2>
-          <p className="text-gray-600 mb-4">{poll.description}</p>
-          <ul>
+      
+      {pollid.length === 0 ? (
+        <div className="text-center py-8">
+          <p className="text-gray-600">Hetkel pole ühtegi aktiivset hääletust.</p>
+        </div>
+      ) : (
+        pollid.map((poll) => (
+          <div key={poll.id} className="mb-8 p-6 bg-white rounded shadow">
+            <h2 className="text-xl font-semibold mb-2">{poll.question}</h2>
+            <p className="text-gray-600 mb-4">{poll.description}</p>
+            <ul>
             {poll.options.map((opt) => {
               const isSelected = valitud[poll.id] === opt.id;
               return (
@@ -136,10 +223,10 @@ export default function PollsPage() {
               >
                 Eemalda hääletus
               </button>
-            </div>
-          )}
+            </div>          )}
         </div>
-      ))}
+      ))
+      )}
     </main>
   );
 }
