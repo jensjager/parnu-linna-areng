@@ -8,6 +8,27 @@ const ChatBox: React.FC = () => {
   const [input, setInput] = useState('');
   const [open, setOpen] = useState(false);
 
+  // Helper to turn URLs into <a> elements
+  const linkify = (text: string) => {
+    const urlRegex = /(https?:\/\/[^\s]+)/g;
+    const parts = text.split(urlRegex);
+    return parts.map((part, i) =>
+      urlRegex.test(part) ? (
+        <a
+          key={i}
+          href={part}
+          target="_blank"
+          rel="noopener noreferrer"
+          style={{ color: '#0070f3', textDecoration: 'underline' }}
+        >
+          {'Rohevõrgustik'}
+        </a>
+      ) : (
+        part
+      )
+    );
+  };
+
   const sendMessage = async () => {
     if (!input.trim()) return;
 
@@ -74,7 +95,8 @@ const ChatBox: React.FC = () => {
           <div style={{ flex: 1, overflowY: 'auto', padding: '10px' }}>
             {messages.map((msg, i) => (
               <div key={i} style={{ textAlign: msg.sender === 'user' ? 'right' : 'left' }}>
-                <strong>{msg.sender === 'user' ? 'You' : 'Bot'}:</strong> {msg.text}
+                <strong>{msg.sender === 'user' ? 'You' : 'Bot'}:</strong>{' '}
+                {linkify(msg.text)}
               </div>
             ))}
           </div>
@@ -98,3 +120,4 @@ const ChatBox: React.FC = () => {
 };
 
 export default ChatBox;
+

@@ -5,19 +5,8 @@ export const getResponse = async (req: Request, res: Response) => {
   const { message } = req.body;
 
   try {
-    const ollamaRes = await fetch('http://localhost:11434/api/chat', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        model: 'mistral',
-        messages: [
-          { role: 'user', content: message }
-        ]
-      })
-    });
+    const reply = 'Pärnu rohevõrgustik ühendab metsakoridore (Audru–Paikuse–Tõstamaa), jõekallaste rohealad (Pärnu ja Sauga jõgi), linnapargid (Rüütli tänav–Papiniidu) ning kergliiklusteed, et tagada katkematu elupaikade ühendus ja elurikkuse säilimine. Lisainfo: http://localhost:3000/arengukava/looduskeskkond/rohevorgustik';
 
-    const data = await ollamaRes.json();
-    const reply = data.message?.content ?? 'No response.';
 
     res.json({ reply });
   } catch (error) {
