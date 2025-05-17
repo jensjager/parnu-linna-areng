@@ -66,12 +66,14 @@ export default function Header() {
             ? isMenuOpen
               ? "transparent"
               : `rgba(8, 108, 172, ${scrollProgress})`
+            : isMenuOpen
+            ? "transparent"
             : "var(--color-primary)", // Solid background on non-home pages
           backdropFilter: isHomePage ? `blur(${blurValue}px)` : "none",
-          // transition: "background-color 0.5s, backdrop-filter 0.5s",
-          boxShadow: (isHomePage ? scrollProgress > 0.2 && !isMenuOpen : true)
-            ? "0 4px 6px -1px rgba(0, 0, 0, 0.1)"
-            : "none",
+          boxShadow:
+            scrollProgress > 0.2 && !isMenuOpen
+              ? "0 4px 6px -1px rgba(0, 0, 0, 0.1)"
+              : "none",
         }}
       >
         <div className="w-screen px-4 sm:px-6 py-4 flex justify-between items-center">
