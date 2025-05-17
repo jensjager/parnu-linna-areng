@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 import express, { Request, Response, NextFunction } from 'express';
 import { ideeGetAll, ideePost, ideeGetById, ideeUpdate, ideeDelete, getSektorid } from '../handlers/idee';
 
@@ -18,5 +19,16 @@ router.delete('/ideed/:id', asyncHandler(ideeDelete));
 
 // Sectors route
 router.get('/sektorid', asyncHandler(getSektorid));
+=======
+import express from 'express';
+import { ideeGetAll, ideePost } from '../handlers/idee';
+import { getResponse } from '../handlers/aiChatbot';
+
+const router = express.Router();
+
+router.get('/idee', ideeGetAll);
+router.post('/ideepost', ideePost);
+router.post('/chat', getResponse);
+>>>>>>> 3bca9096a29dc3cae8c3cdea10fcc5fff1fa056b
 
 export default router;

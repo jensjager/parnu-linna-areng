@@ -5,8 +5,8 @@ export default function Footer() {
   const currentYear = new Date().getFullYear();
 
   return (
-    <footer className="bg-primary text-white">
-      <div className="container px-4 sm:px-6 md:px-8 lg:px-16 xl:px-24  py-8">
+    <footer className="bg-gradient text-white flex justify-center">
+      <div className="container px-4 sm:px-6 md:px-8 lg:px-16 xl:px-24 py-8">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           <div>
             <h3 className="text-xl font-semibold mb-4">Pärnu Linnavalitsus</h3>

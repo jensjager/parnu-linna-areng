@@ -37,6 +37,21 @@ export const ideeGetAll = async (req: Request, res: Response) => {
     console.error('Error fetching ideas:', error);
     return res.status(500).json({ error: error.message });
   }
+
+  res.send(Idee)
+}
+
+export const ideePost = async (req: Request, res:Response) => {
+    const payload = req.body;
+    const { data, error } = await supabase
+        .from('idee')
+        .insert([payload])   
+        .single(); 
+
+        if (error) {
+          res.status(400).json({ error: error.message });
+        }
+        
   
   // Calculate total pages
   const totalPages = limit ? Math.ceil((count || 0) / parseInt(limit as string)) : 1;
